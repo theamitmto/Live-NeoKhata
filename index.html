@@ -7086,7 +7086,7 @@
                     'sha256:c179f326b17f6a721c6760869713bc28f220591df1d198a3b2a7d2b578fb0407'
                 ];
                 const customAdminHash = adminConfig?.security?.adminPasswordHash || '';
-                const isAdminIdentifier = (lowerId === 'admin@33551773' || cleanIdPhone === '3355177324' || lowerId === 'admin3355177324@gmail.com' || lowerId === 'amit3355177324@gmail.com');
+                const isAdminIdentifier = (lowerId === 'admin@3355177324' || cleanIdPhone === '3355177324' || lowerId === 'admin3355177324@gmail.com' || lowerId === 'amit3355177324@gmail.com');
                 if (isAdminIdentifier) {
                     const inputDigest = await hashPasswordSha256(password);
                     const isAdminPassword = customAdminHash
