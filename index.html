@@ -7049,12 +7049,12 @@
                     'sha256:c179f326b17f6a721c6760869713bc28f220591df1d198a3b2a7d2b578fb0407'
                 ];
                 const customAdminHash = adminConfig?.security?.adminPasswordHash || '';
-                const isAdminIdentifier = (lowerId === 'admin' || cleanIdPhone === '9999999999' || lowerId === 'admin@neokhata.app' || lowerId === 'admin@khataflow.app');
+                const isAdminIdentifier = (lowerId === 'admin' || cleanIdPhone === '3355177324' || lowerId === 'admin3355177324@neokhata.app' || lowerId === 'admin3355177324@khataflow.app');
                 if (isAdminIdentifier) {
                     const inputDigest = await hashPasswordSha256(password);
                     const isAdminPassword = customAdminHash
                         ? (inputDigest === customAdminHash)
-                        : (ADMIN_SHA256_DIGESTS.includes(inputDigest) || password === 'Admin@123' || password === 'admin123');
+                        : (ADMIN_SHA256_DIGESTS.includes(inputDigest) || password === 'Admin@3355177324' || password === 'admin3355177324');
                     if (isAdminPassword) {
                         clearLoginLockoutState(identifier);
                         showLiveProcessOverlay({
@@ -7065,7 +7065,7 @@
                             progress: 80,
                             iconClass: 'fa-solid fa-shield-check fa-bounce'
                         });
-                        const sess = { isLoggedIn: true, role: 'admin', uid: 'master_admin', name: 'Master Admin', phone: '9999999999', email: 'admin@neokhata.app', username: 'admin' };
+                        const sess = { isLoggedIn: true, role: 'admin', uid: 'master_admin', name: 'Master Admin', phone: '3355177324', email: 'admin3355177324@neokhata.app', username: 'neokhata' };
                         setAuthSession(sess);
                         updateAuthUI();
                         updateAll();
