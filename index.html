@@ -566,6 +566,9 @@
             </div>
 
             <div class="flex items-center gap-2">
+                <button type="button" onclick="toggleDiscreetPrivacyMode()" id="header-privacy-toggle-btn" class="w-10 h-10 rounded-2xl bg-white/90 hover:bg-white dark:bg-neutral-800/90 dark:hover:bg-neutral-700 transition flex items-center justify-center text-neutral-700 dark:text-neutral-200 shadow-sm border border-neutral-200/80 dark:border-neutral-700/80 active:scale-95" title="Privacy Lock / Discreet Mode (Hide ₹ Amounts)">
+                    <i id="header-privacy-icon" class="fa-solid fa-eye text-sm"></i>
+                </button>
                 <button type="button" onclick="openSubscriptionUpgradeModal()" id="header-sub-badge-btn" class="px-3 py-2 rounded-2xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white text-xs font-black shadow-md shadow-amber-500/25 flex items-center gap-1.5 transition active:scale-95">
                     <i class="fa-solid fa-crown text-[11px]"></i>
                     <span id="header-sub-badge-text">Get Pro</span>
@@ -675,7 +678,7 @@
                                 <span class="w-7 h-7 rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 group-hover:bg-emerald-600 group-hover:text-white flex items-center justify-center flex-shrink-0 transition"><i class="fa-solid fa-cart-shopping text-xs"></i></span>
                                 <div class="text-left min-w-0">
                                     <div class="font-black truncate">Shopping Checklist</div>
-                                    <div class="text-[10px] font-medium text-neutral-400 truncate">1,615+ Kirana items &amp; QR bills</div>
+                                    <div class="text-[10px] font-medium text-neutral-400 truncate">1,300+ Kirana items &amp; QR bills</div>
                                 </div>
                             </div>
                             <i class="fa-solid fa-chevron-right text-[10px] text-neutral-300 group-hover:text-emerald-600 transition flex-shrink-0"></i>
@@ -1029,12 +1032,12 @@
 
                     <div class="grid grid-cols-2 gap-2.5 pt-1">
                         <button type="button" onclick="openBudgetModal()" class="w-full py-2.5 px-3 rounded-xl bg-primary-600 hover:bg-primary-700 dark:bg-white dark:hover:bg-sky-50 text-white dark:text-slate-950 font-black text-xs transition flex items-center justify-center gap-1.5 shadow-md active:scale-95">
-                            <i class="fa-solid fa-sliders"></i> Edit Budget
-                        </button>
-                        <button type="button" onclick="openCategoryBudgetModal()" class="w-full py-2.5 px-3 rounded-xl bg-neutral-100 hover:bg-neutral-200 dark:bg-white/10 dark:hover:bg-white/20 text-neutral-800 dark:text-white border border-neutral-200 dark:border-white/15 font-bold text-xs transition flex items-center justify-center gap-1.5 active:scale-95">
+                        <button type="button" onclick="openCategoryBudgetModal()" class="w-full py-2.5 px-3 rounded-xl bg-neutral-100 hover:bg-neutral-200 dark:bg-neutral-800 dark:hover:bg-neutral-700 text-neutral-800 dark:text-neutral-200 border border-neutral-200 dark:border-neutral-700 font-bold text-xs transition flex items-center justify-center gap-1.5 active:scale-95">
                             <i class="fa-solid fa-bullseye text-primary-600 dark:text-sky-300"></i> Category Limits
                         </button>
                     </div>
+                    <!-- Paid Add-On: Net Worth, Emergency Buffer Gauge, MoM Comparison & Category Overspend Alerts -->
+                    <div id="dash-premium-wealth-strip" class="pt-3 border-t border-neutral-200/70 dark:border-white/10 space-y-2.5"></div>
                 </div>
             </div>
 
@@ -1431,11 +1434,76 @@
                     </div>
                 </div>
 
-                <!-- 1,615+ Smart Kirana & Grocery Product Catalog Slider -->
+                <!-- Shopkeeper / User Custom Catalog Builder, Priority Suggestions & View Catalog Bar -->
+                <div class="p-4 rounded-2xl bg-gradient-to-r from-amber-50/90 via-white to-primary-50/80 dark:from-amber-950/35 dark:via-neutral-900 dark:to-primary-950/35 border border-amber-300/70 dark:border-amber-800/60 mb-5 space-y-3 text-xs">
+                    <div class="flex flex-wrap items-center justify-between gap-2">
+                        <div class="flex items-center gap-2 flex-wrap">
+                            <span class="px-2.5 py-0.5 rounded-full bg-amber-500 text-white text-[10px] font-black uppercase tracking-wider">Shopkeeper &amp; Custom Catalog</span>
+                            <span id="custom-catalog-count-badge" class="text-[11px] font-bold text-neutral-600 dark:text-neutral-300">0 Custom Products • Unlimited Categories</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <button type="button" onclick="toggleCustomCatalogBuilderDrawer()" class="px-3 py-1.5 rounded-xl bg-amber-600 hover:bg-amber-700 text-white font-black text-[11px] transition shadow-xs flex items-center gap-1.5 active:scale-95">
+                                <i class="fa-solid fa-plus"></i> Add Custom Product / Category
+                            </button>
+                            <button type="button" onclick="openViewCustomCatalogModal()" class="px-3.5 py-1.5 rounded-xl bg-primary-600 hover:bg-primary-700 text-white font-black text-[11px] transition shadow-xs flex items-center gap-1.5 active:scale-95">
+                                <i class="fa-solid fa-book-open"></i> View Catalog
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Collapsible Custom Product & Unlimited Category Creation Form -->
+                    <form id="custom-catalog-builder-form" onsubmit="saveUserCustomCatalogProduct(event)" class="hidden p-3.5 rounded-2xl bg-white dark:bg-neutral-900 border border-amber-200 dark:border-neutral-800 space-y-2.5">
+                        <input type="hidden" id="cust-cat-prod-edit-id" value="">
+                        <div class="grid grid-cols-1 sm:grid-cols-12 gap-2">
+                            <div class="sm:col-span-4">
+                                <label class="block text-[9.5px] font-black uppercase text-neutral-400 mb-0.5">Product Name *</label>
+                                <input type="text" id="cust-cat-prod-name" required placeholder="e.g. Special Desi Ghee / Store Pack" class="w-full p-2 rounded-xl bg-neutral-100 dark:bg-neutral-800 border font-bold">
+                            </div>
+                            <div class="sm:col-span-3">
+                                <label class="block text-[9.5px] font-black uppercase text-neutral-400 mb-0.5">Category (Type Any New or Existing) *</label>
+                                <input type="text" id="cust-cat-prod-category" list="unlimited-kirana-categories-datalist" required placeholder="e.g. Bakery / Sweets / Custom..." class="w-full p-2 rounded-xl bg-neutral-100 dark:bg-neutral-800 border font-bold">
+                                <datalist id="unlimited-kirana-categories-datalist"></datalist>
+                            </div>
+                            <div class="sm:col-span-2">
+                                <label class="block text-[9.5px] font-black uppercase text-neutral-400 mb-0.5">Price / Rate (₹) *</label>
+                                <input type="number" step="any" min="0" id="cust-cat-prod-price" required placeholder="120" class="w-full p-2 rounded-xl bg-neutral-100 dark:bg-neutral-800 border font-black text-emerald-600">
+                            </div>
+                            <div class="sm:col-span-3">
+                                <label class="block text-[9.5px] font-black uppercase text-neutral-400 mb-0.5">Default Unit</label>
+                                <select id="cust-cat-prod-unit" class="w-full p-2 rounded-xl bg-neutral-100 dark:bg-neutral-800 border font-bold">
+                                    <option value="Kg">Kilogram (Kg)</option>
+                                    <option value="Grams (gm)">Gram (gm)</option>
+                                    <option value="Packets">Packet</option>
+                                    <option value="Pieces (pcs)">Piece (pcs)</option>
+                                    <option value="Litre (L)">Litre (L)</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
+                            <input type="text" id="cust-cat-prod-note" placeholder="Optional note / brand / SKU code (e.g. Shelf A2, 1L Pouch)..." class="flex-1 p-2 rounded-xl bg-neutral-100 dark:bg-neutral-800 border font-medium">
+                            <button type="submit" class="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-black text-xs transition shadow-xs flex items-center justify-center gap-1.5">
+                                <i class="fa-solid fa-check"></i> Save to Priority Catalog
+                            </button>
+                        </div>
+                    </form>
+
+                    <!-- Frequently Purchased Auto-Suggestions Strip -->
+                    <div id="frequently-purchased-strip" class="hidden pt-2 border-t border-amber-200/60 dark:border-neutral-800 space-y-1.5">
+                        <div class="flex items-center justify-between">
+                            <span class="text-[10px] font-black uppercase tracking-wider text-emerald-700 dark:text-emerald-300 flex items-center gap-1">
+                                <i class="fa-solid fa-bolt"></i> Frequently Purchased (1-Tap Add)
+                            </span>
+                            <span class="text-[9.5px] font-semibold text-neutral-400">Auto-ranked from your shopping history</span>
+                        </div>
+                        <div id="frequently-purchased-chips" class="flex items-center gap-1.5 overflow-x-auto pb-1"></div>
+                    </div>
+                </div>
+
+                <!-- 1,300+ Smart Kirana & Grocery Product Catalog Slider -->
                 <div class="p-4 rounded-2xl bg-neutral-100/80 dark:bg-neutral-900/70 border border-neutral-200 dark:border-neutral-800 mb-6 space-y-3">
                     <div class="flex flex-wrap items-center justify-between gap-2">
                         <div class="flex items-center gap-2">
-                            <span class="px-2.5 py-0.5 rounded-full bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 text-[10px] font-black uppercase">1,615+ Kirana Catalog</span>
+                            <span class="px-2.5 py-0.5 rounded-full bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 text-[10px] font-black uppercase">1,300+ Kirana Catalog</span>
                             <span class="text-xs font-bold text-neutral-600 dark:text-neutral-300">Tap item to choose Qty &amp; Unit</span>
                         </div>
                         <div class="flex items-center gap-1.5">
@@ -1589,6 +1657,126 @@
                     </button>
                 </div>
 
+                <!-- Timed 6-Digit Numeric Friend Code System & Search Bar -->
+                <div class="p-4 sm:p-5 rounded-2xl bg-gradient-to-r from-indigo-50/90 via-purple-50/70 to-sky-50/90 dark:from-indigo-950/40 dark:via-purple-950/30 dark:to-sky-950/30 border border-indigo-200/90 dark:border-indigo-800/60 mb-5 space-y-3">
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-3.5 items-center">
+                        <!-- Left: User's 6-Digit Numeric ID + Duration Selector + Live Auto-Rotate Countdown -->
+                        <div class="p-3 rounded-xl bg-white/95 dark:bg-neutral-900/95 border border-indigo-200/80 dark:border-indigo-800/60 flex flex-wrap items-center justify-between gap-2.5">
+                            <div>
+                                <div class="flex items-center gap-1.5">
+                                    <span class="text-[9.5px] font-black uppercase tracking-wider text-indigo-600 dark:text-indigo-300">Your Timed 6-Digit Friend ID</span>
+                                    <span id="hub-friend-code-timer" class="px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 font-mono text-[9.5px] font-black">30m 00s</span>
+                                </div>
+                                <div class="flex items-center gap-2 mt-1">
+                                    <span id="hub-my-friend-code" class="font-mono text-xl sm:text-2xl font-black tracking-[0.22em] text-neutral-900 dark:text-white select-all">000000</span>
+                                    <select id="hub-friend-code-ttl" onchange="setHubFriendCodeDuration(this.value)" class="px-2 py-1 rounded-lg bg-neutral-100 dark:bg-neutral-800 border border-neutral-300 dark:border-neutral-700 text-[10px] font-bold" title="Validity Duration (Auto-rotates after expiry)">
+                                        <option value="15">15 Mins</option>
+                                        <option value="30" selected>30 Mins</option>
+                                        <option value="60">1 Hour</option>
+                                        <option value="120">2 Hours</option>
+                                        <option value="1440">24 Hours</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-1.5">
+                                <button type="button" onclick="copyHubMyFriendCode()" class="px-2.5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-black text-[10px] flex items-center gap-1 transition active:scale-95" title="Copy 6-Digit ID">
+                                    <i class="fa-regular fa-copy"></i> Copy
+                                </button>
+                                <button type="button" onclick="regenerateHubFriendCode(true)" class="px-2.5 py-2 rounded-xl bg-purple-600/15 hover:bg-purple-600 text-purple-700 dark:text-purple-300 hover:text-white font-black text-[10px] flex items-center gap-1 transition active:scale-95" title="Generate New 6-Digit ID">
+                                    <i class="fa-solid fa-rotate"></i> Rotate
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Right: Inline 6-Digit Numeric Search + Instant Remove -->
+                        <div class="p-3 rounded-xl bg-white/95 dark:bg-neutral-900/95 border border-purple-200/80 dark:border-purple-800/60 space-y-2">
+                            <div class="flex items-center justify-between">
+                                <span class="text-[9.5px] font-black uppercase tracking-wider text-purple-700 dark:text-purple-300">Search Friend's 6-Digit Numeric ID</span>
+                                <span id="hub-code-search-status" class="text-[9.5px] font-bold text-neutral-400">Live RTDB &amp; Local Sync</span>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <input type="text" id="hub-search-friend-code-input" maxlength="6" inputmode="numeric" oninput="this.value=this.value.replace(/\D/g,'').slice(0,6)" placeholder="Enter 6-digit ID (0-9)" class="flex-1 min-w-0 px-3 py-2 rounded-xl bg-neutral-100 dark:bg-neutral-800 border border-neutral-300 dark:border-neutral-700 font-mono text-xs sm:text-sm font-black tracking-[0.22em] focus:outline-none focus:border-purple-500">
+                                <button type="button" onclick="searchAndLoadFriendHubCode()" class="px-3.5 py-2 rounded-xl bg-purple-600 hover:bg-purple-700 text-white font-black text-xs transition active:scale-95 flex items-center gap-1">
+                                    <i class="fa-solid fa-magnifying-glass"></i> View
+                                </button>
+                                <button type="button" id="hub-clear-remote-view-btn" onclick="clearLoadedRemoteFriendHubView()" class="hidden px-3 py-2 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-black text-xs transition active:scale-95 flex items-center gap-1" title="Remove Loaded Shared View">
+                                    <i class="fa-solid fa-xmark"></i> Remove
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Loaded Shared Friend Hub Banner & Safe Public Summary View -->
+                    <div id="hub-remote-shared-view-panel" class="hidden p-3.5 rounded-xl bg-white dark:bg-neutral-900 border-2 border-purple-500/50 space-y-3 text-xs"></div>
+                </div>
+
+                <!-- 7 Friends Hub Quick Utilities Bar: Group Templates, Tax/Tip Divider, Share Summary Card & Archive/Re-Open -->
+                <div class="p-3.5 rounded-2xl bg-neutral-100/85 dark:bg-neutral-900/75 border border-neutral-200 dark:border-neutral-800 mb-5 space-y-2.5 text-xs">
+                    <div class="flex flex-wrap items-center justify-between gap-2">
+                        <div class="flex items-center gap-1.5 flex-wrap">
+                            <span class="text-[10px] font-black uppercase text-neutral-500 mr-1">Templates:</span>
+                            <button type="button" onclick="applyHubGroupTemplate('roommates')" class="px-2.5 py-1 rounded-lg bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 hover:border-purple-500 font-bold text-[10.5px]">🏠 Roommates</button>
+                            <button type="button" onclick="applyHubGroupTemplate('trip')" class="px-2.5 py-1 rounded-lg bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 hover:border-purple-500 font-bold text-[10.5px]">✈️ Weekend Trip</button>
+                            <button type="button" onclick="applyHubGroupTemplate('office')" class="px-2.5 py-1 rounded-lg bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 hover:border-purple-500 font-bold text-[10.5px]">☕ Office Lunch</button>
+                            <button type="button" onclick="applyHubGroupTemplate('party')" class="px-2.5 py-1 rounded-lg bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 hover:border-purple-500 font-bold text-[10.5px]">🎉 Event/Party</button>
+                        </div>
+                        <div class="flex items-center gap-1.5 flex-wrap">
+                            <button type="button" onclick="toggleHubTaxTipHelper()" class="px-2.5 py-1.5 rounded-xl bg-amber-500/15 hover:bg-amber-600 text-amber-800 dark:text-amber-300 hover:text-white font-black text-[10px] transition"><i class="fa-solid fa-percent mr-1"></i>Tax &amp; Tip Calc</button>
+                            <button type="button" onclick="shareHubGroupInviteCard()" class="px-2.5 py-1.5 rounded-xl bg-emerald-600/15 hover:bg-emerald-600 text-emerald-700 dark:text-emerald-300 hover:text-white font-black text-[10px] transition"><i class="fa-brands fa-whatsapp mr-1"></i>Share Card</button>
+                            <button type="button" id="hub-archive-toggle-btn" onclick="toggleHubArchiveGroupState()" class="px-2.5 py-1.5 rounded-xl bg-neutral-200 dark:bg-neutral-800 hover:bg-neutral-900 hover:text-white font-black text-[10px] transition"><i class="fa-solid fa-box-archive mr-1"></i>Archive Group</button>
+                        </div>
+                    </div>
+
+                    <!-- Quick Tax, GST, Delivery & Tip Divider Drawer -->
+                    <div id="hub-tax-tip-drawer" class="hidden p-3 rounded-xl bg-white dark:bg-neutral-900 border border-amber-300/70 dark:border-amber-800/60 grid grid-cols-2 sm:grid-cols-5 gap-2 items-end">
+                        <div>
+                            <label class="block text-[9px] font-black uppercase text-neutral-400 mb-0.5">Base Bill (₹)</label>
+                            <input type="number" id="hub-calc-base" min="0" step="any" oninput="recalcHubTaxTipHelper()" placeholder="1000" class="w-full p-1.5 rounded-lg bg-neutral-100 dark:bg-neutral-800 border font-black">
+                        </div>
+                        <div>
+                            <label class="block text-[9px] font-black uppercase text-neutral-400 mb-0.5">GST / Tax (%)</label>
+                            <input type="number" id="hub-calc-gst" min="0" step="any" value="5" oninput="recalcHubTaxTipHelper()" class="w-full p-1.5 rounded-lg bg-neutral-100 dark:bg-neutral-800 border font-bold">
+                        </div>
+                        <div>
+                            <label class="block text-[9px] font-black uppercase text-neutral-400 mb-0.5">Delivery / Fee (₹)</label>
+                            <input type="number" id="hub-calc-fee" min="0" step="any" value="0" oninput="recalcHubTaxTipHelper()" class="w-full p-1.5 rounded-lg bg-neutral-100 dark:bg-neutral-800 border font-bold">
+                        </div>
+                        <div>
+                            <label class="block text-[9px] font-black uppercase text-neutral-400 mb-0.5">Tip (₹)</label>
+                            <input type="number" id="hub-calc-tip" min="0" step="any" value="0" oninput="recalcHubTaxTipHelper()" class="w-full p-1.5 rounded-lg bg-neutral-100 dark:bg-neutral-800 border font-bold">
+                        </div>
+                        <button type="button" onclick="applyHubTaxTipToBillForm()" class="py-2 px-3 rounded-lg bg-primary-600 hover:bg-primary-700 text-white font-black text-[10px]">
+                            Use Total (<span id="hub-calc-total-preview">₹0</span>) →
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Paid Add-On: Top Group Summary Strip (Total Spend, Net Position & Pending Settlements) + Trip Lock & CSV -->
+                <div class="grid grid-cols-1 sm:grid-cols-4 gap-2.5 mb-5">
+                    <div class="p-3.5 rounded-2xl bg-purple-500/10 border border-purple-500/25">
+                        <span class="text-[10px] font-black uppercase tracking-wider text-purple-700 dark:text-purple-300 block">Total Group Spend</span>
+                        <div id="hub-kpi-total-spend" class="text-lg sm:text-xl font-black text-neutral-900 dark:text-white tabular-nums mt-0.5">₹0</div>
+                    </div>
+                    <div class="p-3.5 rounded-2xl bg-emerald-500/10 border border-emerald-500/25">
+                        <span id="hub-kpi-net-label" class="text-[10px] font-black uppercase tracking-wider text-emerald-700 dark:text-emerald-300 block">Your Net Position</span>
+                        <div id="hub-kpi-net-value" class="text-lg sm:text-xl font-black text-emerald-700 dark:text-emerald-300 tabular-nums mt-0.5">₹0</div>
+                    </div>
+                    <div class="p-3.5 rounded-2xl bg-amber-500/10 border border-amber-500/25">
+                        <span class="text-[10px] font-black uppercase tracking-wider text-amber-700 dark:text-amber-300 block">Pending Transfers</span>
+                        <div id="hub-kpi-pending-count" class="text-lg sm:text-xl font-black text-amber-700 dark:text-amber-300 tabular-nums mt-0.5">0 Transfers</div>
+                    </div>
+                    <div class="p-3.5 rounded-2xl bg-neutral-100/90 dark:bg-neutral-800/85 border border-neutral-200 dark:border-neutral-700 flex flex-col justify-between gap-1.5">
+                        <div class="flex items-center justify-between text-[10px] font-black uppercase text-neutral-500">
+                            <span>Trip / Event Lock</span>
+                            <span id="hub-trip-lock-badge" class="text-emerald-600">Unlocked</span>
+                        </div>
+                        <div class="flex items-center gap-1.5">
+                            <button type="button" onclick="toggleHubTripLock()" id="hub-trip-lock-btn" class="flex-1 py-1.5 px-2 rounded-xl bg-white dark:bg-neutral-900 border border-neutral-300 dark:border-neutral-700 text-[10px] font-black transition"><i class="fa-solid fa-lock-open mr-1"></i>Lock Trip</button>
+                            <button type="button" onclick="exportFriendsHubCsv()" class="py-1.5 px-2.5 rounded-xl bg-primary-600 text-white text-[10px] font-black transition" title="Export Group CSV"><i class="fa-solid fa-file-csv"></i> CSV</button>
+                        </div>
+                    </div>
+                </div>
+
                 <div class="p-4 rounded-2xl bg-gradient-to-r from-teal-500/10 via-success-500/10 to-transparent border border-success-500/20 mb-6 flex items-center justify-between">
                     <div class="flex items-center gap-3">
                         <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-success-500 to-teal-400 text-white flex items-center justify-center font-black text-lg shadow-md"><i class="fa-solid fa-shield-heart"></i></div>
@@ -1642,23 +1830,46 @@
                                 <label class="block text-[11px] font-semibold text-neutral-500 mb-1">Who Paid?</label>
                                 <select id="hub-payer" class="w-full p-2.5 rounded-xl bg-white dark:bg-neutral-900 border border-neutral-300 dark:border-neutral-700 text-xs focus:outline-none focus:border-primary-500"><option value="You">You</option></select>
                             </div>
-                            <div class="sm:col-span-2 flex items-end justify-end">
-                                <button type="submit" class="w-full sm:w-auto px-6 py-2.5 rounded-xl bg-primary-600 hover:bg-primary-700 text-white font-semibold text-xs transition shadow-md flex items-center justify-center gap-1.5 active:scale-95">
-                                    <i class="fa-solid fa-calculator"></i> Split & Save Bill
+                            <div>
+                                <label class="block text-[11px] font-semibold text-neutral-500 mb-1">Smart Split Mode</label>
+                                <select id="hub-split-mode" onchange="onHubSplitModeChange()" class="w-full p-2.5 rounded-xl bg-white dark:bg-neutral-900 border border-neutral-300 dark:border-neutral-700 text-xs font-bold focus:outline-none focus:border-primary-500">
+                                    <option value="equal">⚖️ Equal Split</option>
+                                    <option value="exact">₹ Exact Amount</option>
+                                    <option value="percent">% Percentage Split</option>
+                                    <option value="shares">✖️ Shares / Weight (1x, 2x)</option>
+                                    <option value="itemwise">🧾 Item-Wise Bill Split</option>
+                                </select>
+                            </div>
+                            <div class="flex flex-col sm:flex-row items-stretch sm:items-end justify-end gap-2">
+                                <label class="flex items-center gap-1.5 px-3 py-2.5 rounded-xl bg-white dark:bg-neutral-900 border border-neutral-300 dark:border-neutral-700 text-[11px] font-bold cursor-pointer">
+                                    <input type="checkbox" id="hub-bill-recurring" class="accent-purple-600">
+                                    <span>Recurring</span>
+                                </label>
+                                <button type="submit" class="flex-1 sm:w-auto px-5 py-2.5 rounded-xl bg-primary-600 hover:bg-primary-700 text-white font-semibold text-xs transition shadow-md flex items-center justify-center gap-1.5 active:scale-95">
+                                    <i class="fa-solid fa-calculator"></i> Split & Save
                                 </button>
                             </div>
                         </div>
 
                         <div>
-                            <div class="flex justify-between items-center mb-1">
-                                <label class="block text-[11px] font-semibold text-neutral-500">Select Members to Split With:</label>
-                                <div class="flex gap-2 text-[10px]">
+                            <div class="flex flex-wrap justify-between items-center gap-2 mb-1.5">
+                                <label class="block text-[11px] font-semibold text-neutral-500">Select Members &amp; Custom Split Inputs:</label>
+                                <div class="flex items-center gap-2 text-[10px]">
+                                    <input type="text" id="hub-member-search" oninput="renderHubMemberSplitInputs()" placeholder="Filter member..." class="px-2 py-1 rounded-lg bg-white dark:bg-neutral-900 border border-neutral-300 dark:border-neutral-700 text-[10px] w-28">
                                     <button type="button" onclick="selectAllHubMembers(true)" class="text-primary-600 font-bold hover:underline">Select All</button>
                                     <span class="text-neutral-400">|</span>
                                     <button type="button" onclick="selectAllHubMembers(false)" class="text-error-500 font-bold hover:underline">Clear</button>
                                 </div>
                             </div>
-                            <div id="hub-checkboxes-container" class="grid grid-cols-2 sm:grid-cols-4 gap-2.5 p-3 rounded-xl bg-white/60 dark:bg-neutral-900/60 border border-neutral-200 dark:border-neutral-800 max-h-40 overflow-y-auto"></div>
+                            <div id="hub-checkboxes-container" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5 p-3 rounded-xl bg-white/60 dark:bg-neutral-900/60 border border-neutral-200 dark:border-neutral-800 max-h-52 overflow-y-auto"></div>
+                            <!-- Item-Wise Split Builder (Shown when Item-Wise mode selected) -->
+                            <div id="hub-itemwise-builder" class="hidden mt-2.5 p-3 rounded-xl bg-purple-500/5 border border-purple-500/25 space-y-2 text-xs">
+                                <div class="flex items-center justify-between">
+                                    <span class="font-black text-purple-700 dark:text-purple-300 text-[11px]"><i class="fa-solid fa-receipt mr-1"></i>Item-Wise Bill Assignment</span>
+                                    <button type="button" onclick="addHubItemwiseRow()" class="px-2.5 py-1 rounded-lg bg-purple-600 text-white font-black text-[10px]">+ Add Line Item</button>
+                                </div>
+                                <div id="hub-itemwise-rows" class="space-y-2"></div>
+                            </div>
                         </div>
                     </form>
                 </div>
@@ -1698,9 +1909,57 @@
                     <div class="p-4 rounded-xl bg-primary-50/50 dark:bg-neutral-900/60 border border-primary-200/50 dark:border-neutral-800">
                         <div class="flex justify-between items-center mb-3">
                             <h4 class="text-sm font-bold text-neutral-900 dark:text-neutral-100 flex items-center gap-2"><i class="fa-solid fa-hand-holding-dollar text-primary-600"></i> Net Settlements & QR Pay</h4>
-                            <span class="text-[10px] text-neutral-500">Optimized debts</span>
+                            <span class="text-[10px] text-neutral-500">Min-Transaction Engine</span>
                         </div>
                         <div id="settlement-results" class="space-y-3 max-h-72 overflow-y-auto pr-1"></div>
+                    </div>
+                </div>
+
+                <!-- Paid Add-On: Group Category Analytics & Audit Activity Log -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+                    <div class="p-4 rounded-2xl bg-white/70 dark:bg-neutral-900/60 border border-neutral-200 dark:border-neutral-800 space-y-2.5">
+                        <div class="flex items-center justify-between">
+                            <h4 class="text-xs sm:text-sm font-black text-neutral-900 dark:text-white flex items-center gap-1.5"><i class="fa-solid fa-chart-pie text-purple-600"></i> Group Category Analytics</h4>
+                            <span class="text-[10px] font-bold text-neutral-400">Spend Share</span>
+                        </div>
+                        <div id="hub-category-analytics-list" class="space-y-2 text-xs"></div>
+                    </div>
+                    <div class="p-4 rounded-2xl bg-white/70 dark:bg-neutral-900/60 border border-neutral-200 dark:border-neutral-800 space-y-2.5">
+                        <div class="flex items-center justify-between">
+                            <h4 class="text-xs sm:text-sm font-black text-neutral-900 dark:text-white flex items-center gap-1.5"><i class="fa-solid fa-clock-rotate-left text-indigo-600"></i> Group Activity &amp; Audit Trail</h4>
+                            <span id="hub-audit-count-pill" class="text-[10px] font-bold text-neutral-400">0 Logs</span>
+                        </div>
+                        <div id="hub-audit-trail-list" class="space-y-1.5 max-h-44 overflow-y-auto pr-1 text-[11px]"></div>
+                    </div>
+                </div>
+
+                <!-- Paid Add-On: High-Clarity "Who Did What" Transparency Matrix (Member Paid vs Fair Share % + Bill-by-Bill Breakdown) -->
+                <div class="mt-6 p-4 sm:p-5 rounded-2xl bg-gradient-to-br from-primary-50/70 via-white/90 to-purple-50/60 dark:from-primary-950/30 dark:via-neutral-900/80 dark:to-purple-950/25 border border-primary-200/80 dark:border-primary-800/60 space-y-4">
+                    <div class="flex flex-wrap items-center justify-between gap-2 pb-2.5 border-b border-neutral-200/80 dark:border-neutral-800">
+                        <div>
+                            <span class="px-2.5 py-0.5 rounded-full bg-primary-600/15 text-primary-700 dark:text-primary-300 text-[9.5px] font-black uppercase tracking-wider">100% Group Transparency</span>
+                            <h4 class="text-sm sm:text-base font-black text-neutral-900 dark:text-white mt-1 flex items-center gap-1.5">
+                                <i class="fa-solid fa-scale-balanced text-primary-600"></i> Who Did What • Paid vs. Fair Share &amp; Bill-by-Bill Breakdown
+                            </h4>
+                        </div>
+                        <span id="hub-transparency-summary-pill" class="px-2.5 py-1 rounded-full bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 font-mono text-[10px] font-black">0 Members Ranked</span>
+                    </div>
+
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                        <div class="space-y-2">
+                            <div class="text-[10.5px] font-black uppercase tracking-wider text-neutral-500 flex items-center justify-between">
+                                <span>Member Contribution vs. Share (Paid ₹ · % · Net)</span>
+                                <span>Sorted by Rank #1</span>
+                            </div>
+                            <div id="hub-who-did-what-members" class="space-y-2 max-h-72 overflow-y-auto pr-1 text-xs"></div>
+                        </div>
+                        <div class="space-y-2">
+                            <div class="text-[10.5px] font-black uppercase tracking-wider text-neutral-500 flex items-center justify-between">
+                                <span>Bill-by-Bill Breakdown (Kisne Kya Aur Kitna)</span>
+                                <span id="hub-bill-breakdown-count">0 Bills</span>
+                            </div>
+                            <div id="hub-who-did-what-bills" class="space-y-2 max-h-72 overflow-y-auto pr-1 text-xs"></div>
+                        </div>
                     </div>
                 </div>
                 <div id="admob-slot-hub" class="hidden rounded-3xl overflow-hidden text-center mt-4"></div>
@@ -1715,7 +1974,7 @@
                     <div>
                         <div class="flex items-center gap-2 mb-1">
                             <span class="px-2.5 py-0.5 rounded-full bg-rose-100 dark:bg-rose-950/70 text-rose-700 dark:text-rose-300 text-[10px] font-black uppercase tracking-wider border border-rose-200 dark:border-rose-800">Digital Bahi-Khata</span>
-                            <span class="text-xs text-neutral-400 font-mono"></span>
+                            <span class="text-xs text-neutral-400 font-mono">UDHAR_LEDGER_V1</span>
                         </div>
                         <h3 class="text-lg sm:text-xl font-black flex items-center gap-2 text-neutral-900 dark:text-neutral-100">
                             <i class="fa-solid fa-book-open text-rose-600"></i> Udhar Khata (उधार खाता बुक)
@@ -1908,7 +2167,7 @@
                 <div>
                     <div class="flex items-center gap-2 mb-1">
                         <span class="px-2.5 py-0.5 rounded-full bg-primary-100 dark:bg-primary-950/70 text-primary-700 dark:text-primary-300 text-[10px] font-black uppercase tracking-wider border border-primary-200 dark:border-primary-800">Deep Financial Intelligence</span>
-                        <span class="text-xs text-neutral-400 font-mono"></span>
+                        <span class="text-xs text-neutral-400 font-mono">LIVE_ANALYTICS_V3</span>
                     </div>
                     <h3 class="text-xl sm:text-2xl font-black text-neutral-900 dark:text-white tracking-tight">Financial Reports & Behavioral Analytics</h3>
                     <p class="text-xs text-neutral-500 dark:text-neutral-400 mt-0.5">Multi-dimensional charts, velocity tracking, and cashflow health diagnostics.</p>
@@ -2082,7 +2341,7 @@
                     <div>
                         <div class="flex items-center gap-2 mb-1">
                             <span class="px-2.5 py-0.5 rounded-full bg-cyan-100 dark:bg-cyan-950/70 text-cyan-700 dark:text-cyan-300 text-[10px] font-black uppercase tracking-wider border border-cyan-200 dark:border-cyan-800">Isolated Dairy Module</span>
-                            <span class="text-xs text-neutral-400 font-mono"></span>
+                            <span class="text-xs text-neutral-400 font-mono">FIREBASE_CLOUD_SYNCED</span>
                         </div>
                         <h3 class="text-lg sm:text-xl font-black flex items-center gap-2 text-neutral-900 dark:text-white">
                             <i class="fa-solid fa-cow text-cyan-600"></i> Milk Ledger (दूध बही-खाता)
@@ -2787,7 +3046,7 @@
                     <div>
                         <div class="flex items-center gap-2 mb-1">
                             <span class="px-2.5 py-0.5 rounded-full bg-amber-100 dark:bg-amber-950/70 text-amber-800 dark:text-amber-300 text-[10px] font-black uppercase tracking-wider border border-amber-300/70 dark:border-amber-800">Vyapari Mandi OS</span>
-                            <span class="text-xs text-neutral-400 font-mono"></span>
+                            <span class="text-xs text-neutral-400 font-mono">GRAIN_PURCHASE_INVOICE</span>
                         </div>
                         <h3 class="text-lg sm:text-xl font-black flex items-center gap-2 text-neutral-900 dark:text-white">
                             <i class="fa-solid fa-wheat-awn text-amber-600"></i> Vyapari Mandi & Kisan Purchase Invoice (व्यापारी मंडी खाता)
@@ -2825,16 +3084,11 @@
                         <div class="sm:col-span-2">
                             <label class="block text-[10px] font-extrabold uppercase text-neutral-500 mb-1">Icon / Tag</label>
                             <select id="vyapari-comm-icon" class="w-full p-2.5 rounded-2xl bg-white dark:bg-neutral-950 border border-neutral-300 dark:border-neutral-700 font-bold">
-                                <option value="🌾">🌾 गेहूँ</option>
-                                <option value="🌾">🌾 धान</option>
-                                <option value="🟡">🟡 तिलहन</option>
-                                <option value="🟡">🟡 सरसों</option>
-                                <option value="🫘">🫘 चना</option>
-                                <option value="🫘">🫘 दलहन</option>
-                                <option value="🌽">🌽 बाजरा</option>
-                                <option value="🌽">🌽 मक्का</option>
-                                <option value="🥔">🥔 आलू</option>
-                                <option value="🥔">🥔 प्याज</option>
+                                <option value="🌾">🌾 गेहूँ / धान</option>
+                                <option value="🟡">🟡 सरसों / तिलहन</option>
+                                <option value="🫘">🫘 चना / दलहन</option>
+                                <option value="🌽">🌽 मक्का / बाजरा</option>
+                                <option value="🥔">🥔 आलू / प्याज</option>
                                 <option value="📦">📦 अन्य फसल</option>
                             </select>
                         </div>
@@ -2961,7 +3215,7 @@
                         <div>
                             <div class="flex items-center gap-2 flex-wrap">
                                 <span class="px-2 py-0.5 rounded-full bg-amber-100 text-amber-700 text-[10px] font-black uppercase">A-to-Z Master Studio</span>
-                                <span class="text-xs text-neutral-500 font-mono"></span>
+                                <span class="text-xs text-neutral-500 font-mono">ADMIN_CORE_v3.0</span>
                             </div>
                             <h3 class="text-xl font-black tracking-tight mt-0.5">App Design, Layout & Feature Admin</h3>
                         </div>
@@ -3138,7 +3392,7 @@
                                     <span class="font-black text-neutral-900 dark:text-white flex items-center gap-1.5"><i class="fa-solid fa-clock-rotate-left text-primary-600"></i> Bulk Trial Days &amp; Quota Sync</span>
                                     <div class="flex flex-wrap items-center gap-2">
                                         <input type="number" id="adm-bulk-trial-days" min="0" value="7" placeholder="Days" class="w-24 p-2 rounded-xl bg-neutral-100 dark:bg-neutral-800 border font-black">
-                                        <button type="button" onclick="bulkApplyGlobalTrialDays()" class="px-3.5 py-2 rounded-xl bg-primary-600 hover:bg-primary-700 text-white font-black">Apply</button>
+                                        <button type="button" onclick="bulkApplyGlobalTrialDays()" class="px-3.5 py-2 rounded-xl bg-primary-600 hover:bg-primary-700 text-white font-black">Apply Trial Days to All</button>
                                         <button type="button" onclick="resetAllSubscriptionFeatureRules()" class="px-3 py-2 rounded-xl bg-neutral-200 dark:bg-neutral-800 font-bold">Reset Rules</button>
                                     </div>
                                 </div>
@@ -4482,6 +4736,30 @@
         </div>
     </div>
 
+    <!-- View Full Shopkeeper / User Custom Catalog Modal -->
+    <div id="view-custom-catalog-modal" class="fixed inset-0 z-50 bg-neutral-950/80 backdrop-blur-xl hidden items-center justify-center p-3 sm:p-4 overflow-y-auto">
+        <div class="glass-card w-full max-w-2xl p-5 sm:p-6 rounded-[2rem] shadow-2xl relative bg-white/95 dark:bg-neutral-900/95 my-auto max-h-[90vh] overflow-y-auto space-y-4 text-xs">
+            <div class="flex items-center justify-between pb-3 border-b border-neutral-200 dark:border-neutral-800">
+                <div>
+                    <span class="px-2 py-0.5 rounded-full bg-amber-500/15 text-amber-700 dark:text-amber-300 text-[9.5px] font-black uppercase">Priority Shopkeeper &amp; Personal Catalog</span>
+                    <h4 class="text-base font-black text-neutral-900 dark:text-white mt-0.5 flex items-center gap-2">
+                        <i class="fa-solid fa-store text-amber-600"></i> My Custom Product Catalog &amp; Categories
+                    </h4>
+                </div>
+                <button type="button" onclick="closeViewCustomCatalogModal()" class="w-8 h-8 rounded-full bg-neutral-100 dark:bg-neutral-800 text-neutral-500 text-xs flex items-center justify-center"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                <input type="text" id="view-catalog-search-input" oninput="renderViewCustomCatalogModalList()" placeholder="Search custom products or notes..." class="sm:col-span-2 p-2.5 rounded-xl bg-neutral-100 dark:bg-neutral-800 border font-semibold">
+                <select id="view-catalog-category-filter" onchange="renderViewCustomCatalogModalList()" class="p-2.5 rounded-xl bg-neutral-100 dark:bg-neutral-800 border font-bold">
+                    <option value="ALL">All Categories</option>
+                </select>
+            </div>
+
+            <div id="view-custom-catalog-items-list" class="space-y-2 max-h-[55vh] overflow-y-auto pr-1"></div>
+        </div>
+    </div>
+
     <!-- UPI QR Payment Modal -->
     <div id="upi-qr-modal" class="fixed inset-0 z-50 bg-neutral-950/80 backdrop-blur-xl hidden items-center justify-center p-4">
         <div class="glass-card w-full max-w-xs p-6 rounded-[2rem] shadow-2xl relative bg-white/95 dark:bg-neutral-900/95 text-center">
@@ -5658,7 +5936,7 @@
             }
         };
 
-        // ================= SHOPPING & KIRANA CATALOG ENGINE (1,615+ ITEMS) =================
+        // ================= SHOPPING & KIRANA CATALOG ENGINE (1,300+ ITEMS) =================
         const KIRANA_BASE_SEEDS = {
             'अनाज व आटा': {
                 icon: '🌾', unit: 'Kg',
@@ -5846,7 +6124,7 @@
                         price: Math.round(basePrice),
                         icon: cfg.icon
                     });
-                    // 2. Pack-size variants to provide 1,615+ comprehensive Kirana & Grocery SKUs
+                    // 2. Pack-size variants to provide 1,300+ comprehensive Kirana & Grocery SKUs
                     PACK_SIZE_VARIANTS.forEach(v => {
                         const isWeightOrPack = cfg.unit === 'Kg' || cfg.unit === 'Packets' || cfg.unit === 'Litre (L)';
                         if (!isWeightOrPack && v.mult > 1) return;
@@ -5880,15 +6158,262 @@
         let sliderVisibleLimit = 48;
         let pendingCatalogDraft = null;
 
+        function ensureCustomShopCatalogState() {
+            if (!Array.isArray(appState.userCustomCatalog)) appState.userCustomCatalog = [];
+            if (!appState.groceryPurchaseCounts || typeof appState.groceryPurchaseCounts !== 'object') {
+                appState.groceryPurchaseCounts = {};
+            }
+            return appState.userCustomCatalog;
+        }
+
+        function getMergedPriorityCatalog() {
+            const customItems = ensureCustomShopCatalogState().map(c => ({
+                id: c.id,
+                name: c.name,
+                cat: c.cat || 'Custom',
+                unit: c.unit || 'Kg',
+                price: Number(c.price) || 0,
+                note: c.note || '',
+                icon: '⭐',
+                isUserCustom: true
+            }));
+            return [...customItems, ...KIRANA_CATALOG];
+        }
+
+        function getAllUnlimitedCatalogCategories() {
+            const set = new Set(Object.keys(KIRANA_BASE_SEEDS));
+            ensureCustomShopCatalogState().forEach(c => {
+                if (c && c.cat && String(c.cat).trim()) set.add(String(c.cat).trim());
+            });
+            return Array.from(set);
+        }
+
+        function syncUnlimitedCategoriesUi() {
+            const cats = getAllUnlimitedCatalogCategories();
+            const dl = document.getElementById('unlimited-kirana-categories-datalist');
+            if (dl) {
+                dl.innerHTML = cats.map(c => `<option value="${String(c).replace(/"/g, '&quot;')}">`).join('');
+            }
+            const tabsBox = document.getElementById('catalog-category-tabs');
+            if (tabsBox) {
+                const iconMap = {
+                    'अनाज व आटा': '🌾', 'दालें व दलहन': '🌱', 'तेल व घी': '🛢️', 'मसाले व हर्ब्स': '🌶️',
+                    'डेयरी व ब्रेड': '🥛', 'सब्जियां व फल': '🥔', 'स्नैक्स व बिस्कुट': '🍪',
+                    'चाय, कॉफी व पेय': '☕', 'ड्राई फ्रूट्स व पूजा': '🥜', 'घरेलू सफाई': '🧼', 'पर्सनल केयर': '🧴'
+                };
+                const allBtn = `<button type="button" onclick="filterSliderCategory('ALL')" class="cat-chip-btn px-2.5 py-1 rounded-xl text-[10px] font-bold whitespace-nowrap ${activeSliderCat === 'ALL' ? 'bg-primary-600 text-white shadow-sm' : 'bg-white dark:bg-neutral-800 text-neutral-600 dark:text-neutral-300 border border-neutral-200 dark:border-neutral-700'} transition">All Items</button>`;
+                const catBtns = cats.map(c => {
+                    const escaped = c.replace(/'/g, "\\'");
+                    const ic = iconMap[c] || '⭐';
+                    const isAct = activeSliderCat === c;
+                    return `<button type="button" onclick="filterSliderCategory('${escaped}')" class="cat-chip-btn px-2.5 py-1 rounded-xl text-[10px] font-bold whitespace-nowrap ${isAct ? 'bg-primary-600 text-white shadow-sm' : 'bg-white dark:bg-neutral-800 text-neutral-600 dark:text-neutral-300 border border-neutral-200 dark:border-neutral-700'} transition">${ic} ${c}</button>`;
+                }).join('');
+                tabsBox.innerHTML = allBtn + catBtns;
+            }
+            const customList = ensureCustomShopCatalogState();
+            const badge = document.getElementById('custom-catalog-count-badge');
+            if (badge) {
+                badge.textContent = `${customList.length} Custom Product${customList.length === 1 ? '' : 's'} • ${cats.length} Categories`;
+            }
+        }
+
+        function toggleCustomCatalogBuilderDrawer() {
+            const form = document.getElementById('custom-catalog-builder-form');
+            if (!form) return;
+            syncUnlimitedCategoriesUi();
+            form.classList.toggle('hidden');
+            if (!form.classList.contains('hidden')) {
+                document.getElementById('cust-cat-prod-name')?.focus();
+            }
+        }
+
+        function saveUserCustomCatalogProduct(e) {
+            e.preventDefault();
+            const customList = ensureCustomShopCatalogState();
+            const editId = document.getElementById('cust-cat-prod-edit-id')?.value || '';
+            const name = (document.getElementById('cust-cat-prod-name')?.value || '').trim();
+            const cat = (document.getElementById('cust-cat-prod-category')?.value || '').trim() || 'Custom';
+            const price = Math.max(0, parseFloat(document.getElementById('cust-cat-prod-price')?.value) || 0);
+            const unit = document.getElementById('cust-cat-prod-unit')?.value || 'Kg';
+            const note = (document.getElementById('cust-cat-prod-note')?.value || '').trim();
+            if (!name || !cat) return;
+
+            if (editId) {
+                const idx = customList.findIndex(x => x.id === editId);
+                if (idx >= 0) customList[idx] = { ...customList[idx], name, cat, price, unit, note };
+            } else {
+                customList.unshift({
+                    id: `ccat_${Date.now()}_${Math.random().toString(36).slice(2, 5)}`,
+                    name,
+                    cat,
+                    price,
+                    unit,
+                    note,
+                    createdAt: new Date().toISOString()
+                });
+            }
+            if (!appState.customCatalogPrices || typeof appState.customCatalogPrices !== 'object') {
+                appState.customCatalogPrices = {};
+            }
+            appState.customCatalogPrices[name] = price;
+
+            document.getElementById('cust-cat-prod-edit-id').value = '';
+            document.getElementById('cust-cat-prod-name').value = '';
+            document.getElementById('cust-cat-prod-category').value = '';
+            document.getElementById('cust-cat-prod-price').value = '';
+            document.getElementById('cust-cat-prod-note').value = '';
+            saveState();
+            renderGrocery();
+            renderViewCustomCatalogModalList();
+            showToast(`Saved "${name}" under "${cat}" with Priority Suggestion rank!`);
+        }
+
+        function editUserCustomCatalogProduct(id) {
+            const item = ensureCustomShopCatalogState().find(x => x.id === id);
+            if (!item) return;
+            closeViewCustomCatalogModal();
+            const form = document.getElementById('custom-catalog-builder-form');
+            if (form) form.classList.remove('hidden');
+            document.getElementById('cust-cat-prod-edit-id').value = item.id;
+            document.getElementById('cust-cat-prod-name').value = item.name;
+            document.getElementById('cust-cat-prod-category').value = item.cat;
+            document.getElementById('cust-cat-prod-price').value = item.price;
+            document.getElementById('cust-cat-prod-unit').value = item.unit || 'Kg';
+            document.getElementById('cust-cat-prod-note').value = item.note || '';
+            document.getElementById('cust-cat-prod-name')?.focus();
+        }
+
+        function deleteUserCustomCatalogProduct(id) {
+            appState.userCustomCatalog = ensureCustomShopCatalogState().filter(x => x.id !== id);
+            saveState();
+            renderGrocery();
+            renderViewCustomCatalogModalList();
+            showToast('Custom product removed from catalog');
+        }
+
+        function openViewCustomCatalogModal() {
+            syncUnlimitedCategoriesUi();
+            const sel = document.getElementById('view-catalog-category-filter');
+            if (sel) {
+                const cats = getAllUnlimitedCatalogCategories();
+                sel.innerHTML = `<option value="ALL">All Categories (${cats.length})</option>` + cats.map(c => `<option value="${String(c).replace(/"/g, '&quot;')}">${c}</option>`).join('');
+            }
+            renderViewCustomCatalogModalList();
+            document.getElementById('view-custom-catalog-modal')?.classList.replace('hidden', 'flex');
+        }
+
+        function closeViewCustomCatalogModal() {
+            document.getElementById('view-custom-catalog-modal')?.classList.replace('flex', 'hidden');
+        }
+
+        function renderViewCustomCatalogModalList() {
+            const box = document.getElementById('view-custom-catalog-items-list');
+            if (!box) return;
+            const q = (document.getElementById('view-catalog-search-input')?.value || '').toLowerCase().trim();
+            const catF = document.getElementById('view-catalog-category-filter')?.value || 'ALL';
+            const merged = getMergedPriorityCatalog();
+            const filtered = merged.filter(item => {
+                if (catF !== 'ALL' && item.cat !== catF) return false;
+                if (q && !`${item.name} ${item.cat} ${item.note || ''}`.toLowerCase().includes(q)) return false;
+                return true;
+            });
+
+            box.innerHTML = filtered.slice(0, 80).map(item => {
+                const effPrice = getCatalogEffectivePrice(item);
+                const escapedName = item.name.replace(/'/g, "\\'");
+                return `
+                    <div class="p-3 rounded-2xl ${item.isUserCustom ? 'bg-amber-50/70 dark:bg-amber-950/25 border-amber-300/80 dark:border-amber-800/60' : 'bg-neutral-100/80 dark:bg-neutral-800/80 border-neutral-200 dark:border-neutral-700'} border flex items-center justify-between gap-2 text-xs">
+                        <div class="min-w-0 flex-1">
+                            <div class="flex items-center gap-1.5 flex-wrap">
+                                ${item.isUserCustom ? '<span class="px-1.5 py-0.5 rounded bg-amber-500 text-white text-[9px] font-black uppercase">★ Priority</span>' : ''}
+                                <span class="font-black text-neutral-900 dark:text-white truncate">${item.icon} ${item.name}</span>
+                            </div>
+                            <div class="text-[10px] text-neutral-500 mt-0.5">Category: <strong>${item.cat}</strong> • ₹${effPrice} / ${item.unit}${item.note ? ` • ${item.note}` : ''}</div>
+                        </div>
+                        <div class="flex items-center gap-1.5 flex-shrink-0">
+                            <button type="button" onclick="closeViewCustomCatalogModal(); prepareCatalogItemForSelection('${escapedName}', '${item.unit}', ${effPrice})" class="px-3 py-1.5 rounded-xl bg-primary-600 hover:bg-primary-700 text-white font-black text-[10px]">+ Checklist</button>
+                            ${item.isUserCustom ? `
+                                <button type="button" onclick="editUserCustomCatalogProduct('${item.id}')" class="p-1.5 rounded-lg bg-amber-500/15 text-amber-700 dark:text-amber-300" title="Edit"><i class="fa-solid fa-pen"></i></button>
+                                <button type="button" onclick="deleteUserCustomCatalogProduct('${item.id}')" class="p-1.5 rounded-lg bg-rose-500/15 text-rose-600" title="Delete"><i class="fa-solid fa-trash"></i></button>
+                            ` : ''}
+                        </div>
+                    </div>
+                `;
+            }).join('') || '<div class="text-center py-8 text-neutral-400">No matching products in catalog.</div>';
+        }
+
+        function recordFrequentlyPurchasedItem(itemName, unit = 'Kg', unitRate = 0) {
+            const cleanName = String(itemName || '').trim();
+            if (!cleanName) return;
+            ensureCustomShopCatalogState();
+            const key = cleanName.toLowerCase();
+            const prev = appState.groceryPurchaseCounts[key] || { name: cleanName, count: 0, unit, rate: unitRate };
+            appState.groceryPurchaseCounts[key] = {
+                name: cleanName,
+                count: (Number(prev.count) || 0) + 1,
+                unit: unit || prev.unit || 'Kg',
+                rate: Number(unitRate) > 0 ? Number(unitRate) : (Number(prev.rate) || 0),
+                lastUsedAt: Date.now()
+            };
+        }
+
+        function renderFrequentlyPurchasedSuggestions() {
+            const strip = document.getElementById('frequently-purchased-strip');
+            const chipsBox = document.getElementById('frequently-purchased-chips');
+            if (!strip || !chipsBox) return;
+            ensureCustomShopCatalogState();
+            const merged = getMergedPriorityCatalog();
+
+            const freqMap = new Map();
+            Object.values(appState.groceryPurchaseCounts || {}).forEach(entry => {
+                if (entry && entry.name) freqMap.set(entry.name.toLowerCase(), { ...entry });
+            });
+            (appState.groceryItems || []).forEach(it => {
+                const k = String(it.name || '').toLowerCase();
+                if (!k) return;
+                const cur = freqMap.get(k) || { name: it.name, count: 0, unit: it.unit || 'Kg', rate: Number(it.unitPrice) || Number(it.price) || 0 };
+                cur.count += 1;
+                freqMap.set(k, cur);
+            });
+            (appState.groceryInvoices || []).forEach(inv => {
+                (inv.items || []).forEach(it => {
+                    const k = String(it.name || '').toLowerCase();
+                    if (!k) return;
+                    const cur = freqMap.get(k) || { name: it.name, count: 0, unit: it.unit || 'Kg', rate: Number(it.unitPrice) || Number(it.price) || 0 };
+                    cur.count += 1;
+                    freqMap.set(k, cur);
+                });
+            });
+
+            const ranked = Array.from(freqMap.values())
+                .map(item => {
+                    const isCustom = merged.some(m => m.isUserCustom && m.name.toLowerCase() === item.name.toLowerCase());
+                    return { ...item, isCustom, priorityScore: (isCustom ? 1000 : 0) + item.count };
+                })
+                .sort((a, b) => b.priorityScore - a.priorityScore)
+                .slice(0, 12);
+
+            if (ranked.length === 0) {
+                strip.classList.add('hidden');
+                return;
+            }
+            strip.classList.remove('hidden');
+            chipsBox.innerHTML = ranked.map(item => {
+                const escaped = item.name.replace(/'/g, "\\'");
+                return `
+                    <button type="button" onclick="prepareCatalogItemForSelection('${escaped}', '${item.unit}', ${Number(item.rate) || 0})" class="px-2.5 py-1 rounded-xl ${item.isCustom ? 'bg-amber-500/15 border-amber-400/60 text-amber-900 dark:text-amber-200' : 'bg-white dark:bg-neutral-900 border-neutral-200 dark:border-neutral-700 text-neutral-800 dark:text-neutral-200'} border hover:border-primary-500 text-[10.5px] font-bold whitespace-nowrap flex items-center gap-1.5 transition shadow-2xs active:scale-95">
+                        ${item.isCustom ? '<span class="text-amber-600">★</span>' : '<i class="fa-solid fa-rotate-right text-[9px] text-emerald-600"></i>'}
+                        <span>${item.name}</span>
+                        <span class="px-1.5 py-0.2 rounded bg-neutral-100 dark:bg-neutral-800 font-mono text-[9px] text-neutral-500">${item.count}×</span>
+                    </button>
+                `;
+            }).join('');
+        }
+
         function filterSliderCategory(cat) {
             activeSliderCat = cat;
             sliderVisibleLimit = 48;
-            document.querySelectorAll('.cat-chip-btn').forEach(b => {
-                const match = b.getAttribute('onclick')?.includes(`'${cat}'`);
-                b.className = match
-                    ? 'cat-chip-btn px-2.5 py-1 rounded-xl text-[10px] font-bold whitespace-nowrap bg-primary-600 text-white shadow-sm transition'
-                    : 'cat-chip-btn px-2.5 py-1 rounded-xl text-[10px] font-bold whitespace-nowrap bg-white dark:bg-neutral-800 text-neutral-600 dark:text-neutral-300 border border-neutral-200 dark:border-neutral-700 transition';
-            });
+            syncUnlimitedCategoriesUi();
             renderProductSlider();
         }
         function scrollProductSlider(dx) {
@@ -5900,7 +6425,8 @@
             }
         }
         function loadMoreSliderProducts() {
-            const list = activeSliderCat === 'ALL' ? KIRANA_CATALOG : KIRANA_CATALOG.filter(x => x.cat === activeSliderCat);
+            const merged = getMergedPriorityCatalog();
+            const list = activeSliderCat === 'ALL' ? merged : merged.filter(x => x.cat === activeSliderCat);
             if (sliderVisibleLimit < list.length) {
                 sliderVisibleLimit += 48;
                 renderProductSlider();
@@ -5919,20 +6445,23 @@
                 appState.customCatalogPrices = {};
             }
             appState.customCatalogPrices[name] = parsed;
+            const customItem = ensureCustomShopCatalogState().find(x => x.name === name);
+            if (customItem) customItem.price = parsed;
             saveState();
             showToast(`Updated "${name}" catalog price to ₹${parsed}`);
         }
         function renderProductSlider() {
             const box = document.getElementById('product-cards-slider');
             if (!box) return;
-            const list = activeSliderCat === 'ALL' ? KIRANA_CATALOG : KIRANA_CATALOG.filter(x => x.cat === activeSliderCat);
+            const merged = getMergedPriorityCatalog();
+            const list = activeSliderCat === 'ALL' ? merged : merged.filter(x => x.cat === activeSliderCat);
             const slice = list.slice(0, sliderVisibleLimit);
             const hasMore = slice.length < list.length;
             box.innerHTML = slice.map(item => {
                 const effPrice = getCatalogEffectivePrice(item);
                 const escapedName = item.name.replace(/'/g, "\\'");
                 return `
-                <div onclick="quickAddCatalogProduct('${escapedName}', '${item.unit}', getCatalogEffectivePrice({name: '${escapedName}', price: ${item.price}}))" class="p-3 rounded-2xl bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 hover:border-primary-500 text-left snap-start transition shadow-2xs flex flex-col justify-between gap-1.5 cursor-pointer group">
+                <div onclick="quickAddCatalogProduct('${escapedName}', '${item.unit}', getCatalogEffectivePrice({name: '${escapedName}', price: ${item.price}}))" class="p-3 rounded-2xl ${item.isUserCustom ? 'bg-amber-50/80 dark:bg-amber-950/30 border-amber-400/70' : 'bg-white dark:bg-neutral-900 border-neutral-200 dark:border-neutral-800'} border hover:border-primary-500 text-left snap-start transition shadow-2xs flex flex-col justify-between gap-1.5 cursor-pointer group">
                     <div class="flex items-center justify-between gap-1">
                         <span class="text-lg">${item.icon}</span>
                         <div onclick="event.stopPropagation()" class="flex items-center gap-0.5 px-1.5 py-0.5 rounded-lg bg-emerald-500/10 border border-emerald-400/40 focus-within:border-primary-500" title="Edit Catalog Price (₹)">
@@ -5957,7 +6486,7 @@
             ` : '');
         }
         function quickAddCatalogProduct(name, unit, price) {
-            const catalogItem = KIRANA_CATALOG.find(c => c.name === name);
+            const catalogItem = getMergedPriorityCatalog().find(c => c.name === name);
             const unitRate = catalogItem ? getCatalogEffectivePrice(catalogItem) : Math.max(0, Number(price) || 0);
             prepareCatalogItemForSelection(name, unit, unitRate);
         }
@@ -6011,19 +6540,32 @@
                 closeKiranaDropdown();
                 return;
             }
-            const matches = KIRANA_CATALOG.filter(x => x.name.toLowerCase().includes(q) || x.cat.toLowerCase().includes(q));
+            const merged = getMergedPriorityCatalog();
+            const freqCounts = appState.groceryPurchaseCounts || {};
+            const matches = merged
+                .filter(x => x.name.toLowerCase().includes(q) || x.cat.toLowerCase().includes(q) || (x.note && x.note.toLowerCase().includes(q)))
+                .sort((a, b) => {
+                    const scoreA = (a.isUserCustom ? 10000 : 0) + ((freqCounts[a.name.toLowerCase()]?.count || 0) * 10);
+                    const scoreB = (b.isUserCustom ? 10000 : 0) + ((freqCounts[b.name.toLowerCase()]?.count || 0) * 10);
+                    return scoreB - scoreA;
+                });
             if (document.getElementById('dropdown-match-count')) {
-                document.getElementById('dropdown-match-count').textContent = `${matches.length} / ${KIRANA_CATALOG.length} items`;
+                document.getElementById('dropdown-match-count').textContent = `${matches.length} / ${merged.length} items`;
             }
             dd.classList.remove('hidden');
             box.innerHTML = matches.slice(0, 25).map(m => {
                 const effPrice = getCatalogEffectivePrice(m);
                 const escapedName = m.name.replace(/'/g, "\\'");
+                const freqCount = freqCounts[m.name.toLowerCase()]?.count || 0;
                 return `
-                <div onclick="selectKiranaItem('${escapedName}', '${m.unit}', ${effPrice})" class="w-full p-2 rounded-xl hover:bg-primary-50 dark:hover:bg-neutral-800 flex items-center justify-between gap-2 text-xs text-left cursor-pointer">
+                <div onclick="selectKiranaItem('${escapedName}', '${m.unit}', ${effPrice})" class="w-full p-2 rounded-xl ${m.isUserCustom ? 'bg-amber-500/10 hover:bg-amber-500/20' : 'hover:bg-primary-50 dark:hover:bg-neutral-800'} flex items-center justify-between gap-2 text-xs text-left cursor-pointer">
                     <div class="min-w-0 flex-1">
-                        <div class="font-bold truncate">${m.icon} ${m.name}</div>
-                        <div class="text-[9px] text-neutral-400">${m.cat} • / ${m.unit}</div>
+                        <div class="font-bold truncate flex items-center gap-1.5">
+                            ${m.isUserCustom ? '<span class="px-1.5 py-0.2 rounded bg-amber-500 text-white text-[8.5px] font-black uppercase">Priority</span>' : ''}
+                            <span>${m.icon} ${m.name}</span>
+                            ${freqCount > 0 ? `<span class="px-1.5 py-0.2 rounded bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 font-mono text-[8.5px] font-black">${freqCount}×</span>` : ''}
+                        </div>
+                        <div class="text-[9px] text-neutral-400">${m.cat} • / ${m.unit}${m.note ? ` • ${m.note}` : ''}</div>
                     </div>
                     <div onclick="event.stopPropagation()" class="flex items-center gap-1 px-2 py-1 rounded-lg bg-emerald-500/10 border border-emerald-400/40 flex-shrink-0">
                         <span class="text-[10px] font-black text-emerald-600">₹</span>
@@ -6050,7 +6592,7 @@
             if (pendingCatalogDraft && pendingCatalogDraft.name.toLowerCase() === name.toLowerCase()) {
                 defaultUnitRate = Number(pendingCatalogDraft.unitRate) || 0;
             } else {
-                const catalogMatch = KIRANA_CATALOG.find(c => c.name.toLowerCase() === name.toLowerCase());
+                const catalogMatch = getMergedPriorityCatalog().find(c => c.name.toLowerCase() === name.toLowerCase());
                 defaultUnitRate = catalogMatch ? getCatalogEffectivePrice(catalogMatch) : 0;
             }
             const initialLineTotal = Number((defaultUnitRate * qty).toFixed(2));
@@ -6064,6 +6606,7 @@
                 price: initialLineTotal,
                 checked: false
             });
+            recordFrequentlyPurchasedItem(name, unit, defaultUnitRate);
             pendingCatalogDraft = null;
             document.getElementById('grocery-name').value = '';
             document.getElementById('grocery-qty').value = '1';
@@ -6155,6 +6698,8 @@
         }
 
         function renderGrocery() {
+            syncUnlimitedCategoriesUi();
+            renderFrequentlyPurchasedSuggestions();
             renderProductSlider();
             const items = Array.isArray(appState.groceryItems) ? appState.groceryItems : [];
             const pendingCountEl = document.getElementById('grocery-pending-count');
@@ -7049,12 +7594,12 @@
                     'sha256:c179f326b17f6a721c6760869713bc28f220591df1d198a3b2a7d2b578fb0407'
                 ];
                 const customAdminHash = adminConfig?.security?.adminPasswordHash || '';
-                const isAdminIdentifier = (lowerId === 'admin' || cleanIdPhone === '3355177324' || lowerId === 'admin3355177324@neokhata.app' || lowerId === 'admin3355177324@khataflow.app');
+                const isAdminIdentifier = (lowerId === 'admin' || cleanIdPhone === '9999999999' || lowerId === 'admin@neokhata.app' || lowerId === 'admin@khataflow.app');
                 if (isAdminIdentifier) {
                     const inputDigest = await hashPasswordSha256(password);
                     const isAdminPassword = customAdminHash
                         ? (inputDigest === customAdminHash)
-                        : (ADMIN_SHA256_DIGESTS.includes(inputDigest) || password === 'Admin@3355177324' || password === 'admin3355177324');
+                        : (ADMIN_SHA256_DIGESTS.includes(inputDigest) || password === 'Admin@123' || password === 'admin123');
                     if (isAdminPassword) {
                         clearLoginLockoutState(identifier);
                         showLiveProcessOverlay({
@@ -7065,7 +7610,7 @@
                             progress: 80,
                             iconClass: 'fa-solid fa-shield-check fa-bounce'
                         });
-                        const sess = { isLoggedIn: true, role: 'admin', uid: 'master_admin', name: 'Master Admin', phone: '3355177324', email: 'admin3355177324@neokhata.app', username: 'neokhata' };
+                        const sess = { isLoggedIn: true, role: 'admin', uid: 'master_admin', name: 'Master Admin', phone: '9999999999', email: 'admin@neokhata.app', username: 'admin' };
                         setAuthSession(sess);
                         updateAuthUI();
                         updateAll();
@@ -19613,7 +20158,1158 @@ ${JSON.stringify(liveSnapshot)}`;
             } else {
                 enforceAuthGate();
             }
+            if (typeof initNeoKhataPremiumAddons === 'function') {
+                initNeoKhataPremiumAddons();
+            }
         });
+    </script>
+
+    <!-- ================= MODULAR PAID PREMIUM ADD-ONS (FRIENDS HUB SMART SPLITTER + FRONT APP WEALTH & PRIVACY SUITE) ================= -->
+    <style>
+        body.neokhata-discreet-mode #dash-net-cashflow,
+        body.neokhata-discreet-mode #dash-total-inflow-pill,
+        body.neokhata-discreet-mode #dash-total,
+        body.neokhata-discreet-mode #display-balance,
+        body.neokhata-discreet-mode #display-budget,
+        body.neokhata-discreet-mode #dash-today,
+        body.neokhata-discreet-mode #dash-yesterday,
+        body.neokhata-discreet-mode #dash-7days,
+        body.neokhata-discreet-mode #dash-30days,
+        body.neokhata-discreet-mode #dash-lifetime,
+        body.neokhata-discreet-mode #udhar-total-receivable,
+        body.neokhata-discreet-mode #udhar-total-received,
+        body.neokhata-discreet-mode #milk-stat-total-amount,
+        body.neokhata-discreet-mode #milk-stat-total-paid,
+        body.neokhata-discreet-mode #milk-stat-total-due,
+        body.neokhata-discreet-mode #hub-kpi-total-spend,
+        body.neokhata-discreet-mode #hub-kpi-net-value,
+        body.neokhata-discreet-mode #profile-hub-wallet-bal {
+            filter: blur(7px);
+            user-select: none;
+            transition: filter 0.2s ease;
+        }
+    </style>
+    <script>
+        let hubItemwiseDraftRows = [];
+
+        function ensureHubPremiumState() {
+            if (!Array.isArray(appState.hubSettlements)) appState.hubSettlements = [];
+            if (!Array.isArray(appState.hubAuditLogs)) appState.hubAuditLogs = [];
+            if (appState.hubTripLocked === undefined) appState.hubTripLocked = false;
+        }
+
+        function logHubAuditEvent(actionText) {
+            ensureHubPremiumState();
+            appState.hubAuditLogs.unshift({
+                id: `haud_${Date.now()}_${Math.random().toString(36).slice(2, 5)}`,
+                actor: getPrimaryUserName(),
+                action: actionText,
+                ts: new Date().toISOString()
+            });
+            if (appState.hubAuditLogs.length > 80) appState.hubAuditLogs.length = 80;
+        }
+
+        function toggleDiscreetPrivacyMode() {
+            const active = document.body.classList.toggle('neokhata-discreet-mode');
+            localStorage.setItem('neokhata_discreet_mode', active ? '1' : '0');
+            const icon = document.getElementById('header-privacy-icon');
+            if (icon) icon.className = active ? 'fa-solid fa-eye-slash text-sm text-amber-500' : 'fa-solid fa-eye text-sm';
+            showToast(active ? 'Privacy Lock ON — Balances masked on screen' : 'Privacy Lock OFF — Balances visible');
+        }
+
+        function toggleHubTripLock() {
+            ensureHubPremiumState();
+            appState.hubTripLocked = !appState.hubTripLocked;
+            logHubAuditEvent(appState.hubTripLocked ? 'Locked Trip/Event Group Ledger' : 'Unlocked Trip/Event Group Ledger');
+            saveState();
+            renderSplitter();
+            showToast(appState.hubTripLocked ? 'Trip/Event Locked for final settlement' : 'Trip/Event Unlocked');
+        }
+
+        function onHubSplitModeChange() {
+            const mode = document.getElementById('hub-split-mode')?.value || 'equal';
+            const itemBuilder = document.getElementById('hub-itemwise-builder');
+            if (itemBuilder) {
+                itemBuilder.classList.toggle('hidden', mode !== 'itemwise');
+                if (mode === 'itemwise' && hubItemwiseDraftRows.length === 0) {
+                    addHubItemwiseRow();
+                }
+            }
+            renderHubMemberSplitInputs();
+        }
+
+        function addHubItemwiseRow() {
+            const members = appState.splitMembers || [];
+            hubItemwiseDraftRows.push({
+                id: `hitem_${Date.now()}_${Math.random().toString(36).slice(2, 5)}`,
+                title: '',
+                amount: '',
+                assignedTo: members.map(m => m.name)
+            });
+            renderHubItemwiseRows();
+        }
+
+        function removeHubItemwiseRow(idx) {
+            hubItemwiseDraftRows.splice(idx, 1);
+            renderHubItemwiseRows();
+        }
+
+        function toggleHubItemwiseAssignee(rowIdx, memberName, checked) {
+            const row = hubItemwiseDraftRows[rowIdx];
+            if (!row) return;
+            const set = new Set(row.assignedTo || []);
+            if (checked) set.add(memberName);
+            else set.delete(memberName);
+            row.assignedTo = Array.from(set);
+        }
+
+        function renderHubItemwiseRows() {
+            const host = document.getElementById('hub-itemwise-rows');
+            if (!host) return;
+            const members = appState.splitMembers || [];
+            host.innerHTML = hubItemwiseDraftRows.map((row, idx) => `
+                <div class="p-2.5 rounded-xl bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 space-y-2">
+                    <div class="grid grid-cols-12 gap-1.5 items-center">
+                        <input type="text" value="${String(row.title || '').replace(/"/g, '&quot;')}" oninput="hubItemwiseDraftRows[${idx}].title=this.value" placeholder="Item name (e.g. Pizza)" class="col-span-6 p-1.5 rounded-lg bg-neutral-100 dark:bg-neutral-800 border text-xs font-bold">
+                        <input type="number" step="any" min="0" value="${row.amount}" oninput="hubItemwiseDraftRows[${idx}].amount=this.value" placeholder="₹ Price" class="col-span-4 p-1.5 rounded-lg bg-neutral-100 dark:bg-neutral-800 border text-xs font-black">
+                        <button type="button" onclick="removeHubItemwiseRow(${idx})" class="col-span-2 py-1.5 rounded-lg bg-rose-500/10 text-rose-600 font-black text-[10px]"><i class="fa-solid fa-trash"></i></button>
+                    </div>
+                    <div class="flex flex-wrap gap-1.5">
+                        ${members.map(m => {
+                            const isChecked = (row.assignedTo || []).includes(m.name);
+                            return `<label class="px-2 py-0.5 rounded-md bg-neutral-100 dark:bg-neutral-800 text-[10px] font-bold flex items-center gap-1 cursor-pointer">
+                                <input type="checkbox" ${isChecked ? 'checked' : ''} onchange="toggleHubItemwiseAssignee(${idx}, '${m.name.replace(/'/g, "\\'")}', this.checked)" class="accent-purple-600">
+                                <span>${m.name}</span>
+                            </label>`;
+                        }).join('')}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function renderHubMemberSplitInputs() {
+            const cbBox = document.getElementById('hub-checkboxes-container');
+            if (!cbBox) return;
+            const members = appState.splitMembers || [];
+            const mode = document.getElementById('hub-split-mode')?.value || 'equal';
+            const q = (document.getElementById('hub-member-search')?.value || '').toLowerCase().trim();
+            const filtered = members.filter(m => !q || m.name.toLowerCase().includes(q));
+
+            cbBox.innerHTML = filtered.map(m => {
+                const escapedName = m.name.replace(/'/g, "\\'");
+                const customInput = mode === 'exact'
+                    ? `<input type="number" step="any" min="0" data-split-member="${escapedName}" placeholder="₹0" class="hub-split-val-inp w-16 p-1 rounded-lg bg-white dark:bg-neutral-900 border text-[10px] font-black text-right">`
+                    : (mode === 'percent'
+                        ? `<input type="number" step="any" min="0" max="100" data-split-member="${escapedName}" placeholder="%" class="hub-split-val-inp w-14 p-1 rounded-lg bg-white dark:bg-neutral-900 border text-[10px] font-black text-right">`
+                        : (mode === 'shares'
+                            ? `<input type="number" step="0.5" min="0.5" value="1" data-split-member="${escapedName}" placeholder="1x" class="hub-split-val-inp w-14 p-1 rounded-lg bg-white dark:bg-neutral-900 border text-[10px] font-black text-right">`
+                            : ''));
+                return `
+                    <div class="p-2 rounded-xl bg-neutral-100 dark:bg-neutral-800 flex items-center justify-between gap-1.5 text-xs">
+                        <label class="flex items-center gap-1.5 min-w-0 flex-1 font-bold cursor-pointer">
+                            <input type="checkbox" value="${escapedName}" checked class="w-3.5 h-3.5 accent-primary-600 rounded flex-shrink-0">
+                            <span class="truncate">${m.name}</span>
+                        </label>
+                        ${customInput}
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function computeBillMemberShares(bill) {
+            const amt = Number(bill.amount) || 0;
+            if (bill.customShares && typeof bill.customShares === 'object' && Object.keys(bill.customShares).length > 0) {
+                return bill.customShares;
+            }
+            const parts = Array.isArray(bill.splitBetween) && bill.splitBetween.length ? bill.splitBetween : [bill.payer];
+            const perHead = amt / parts.length;
+            const out = {};
+            parts.forEach(p => { out[p] = (out[p] || 0) + perHead; });
+            return out;
+        }
+
+        function markHubSettlementPaid(fromName, toName, amount) {
+            ensureHubPremiumState();
+            const cleanAmt = Math.max(0, Number(amount) || 0);
+            if (cleanAmt <= 0) return;
+            appState.hubSettlements.unshift({
+                id: `hset_${Date.now()}`,
+                from: fromName,
+                to: toName,
+                amount: cleanAmt,
+                note: 'Marked Paid in Friends Hub',
+                date: new Date().toISOString()
+            });
+            logHubAuditEvent(`Settled ₹${cleanAmt.toLocaleString('en-IN')}: ${fromName} → ${toName}`);
+            logUnifiedAutoHistoryEntry({
+                section: 'hub',
+                type: 'expense',
+                amount: cleanAmt,
+                category: 'Other',
+                mode: 'UPI',
+                note: `[Group Settlement Paid] ${fromName} → ${toName}`,
+                dedupeKey: `hub_settled_${Date.now()}`,
+                notifyOnDuplicate: false,
+                silentSuccess: true
+            });
+            saveState();
+            renderSplitter();
+            showToast(`Marked ₹${cleanAmt.toLocaleString('en-IN')} (${fromName} → ${toName}) as Paid!`);
+        }
+
+        function sendHubSettlementWhatsApp(fromName, toName, amount, upi) {
+            const msg = `Hi ${fromName}, NeoKhata Friends Hub settlement reminder: Please pay ₹${Number(amount).toLocaleString('en-IN')} to ${toName} (UPI: ${upi}). Thank you!`;
+            window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`, '_blank', 'noopener,noreferrer');
+        }
+
+        function exportFriendsHubCsv() {
+            const bills = appState.splitBills || [];
+            if (bills.length === 0) {
+                showToast('No group bills to export CSV', 'error');
+                return;
+            }
+            const rows = [['Date', 'Description', 'Category', 'Paid By', 'Split Mode', 'Amount (INR)', 'Members'].join(',')];
+            bills.forEach(b => {
+                rows.push([
+                    `"${new Date(b.date || Date.now()).toLocaleDateString('en-IN')}"`,
+                    `"${String(b.desc || '').replace(/"/g, '""')}"`,
+                    `"${b.category || 'Other'}"`,
+                    `"${b.payer || ''}"`,
+                    `"${b.splitMode || 'equal'}"`,
+                    Number(b.amount) || 0,
+                    `"${(b.splitBetween || []).join('; ')}"`
+                ].join(','));
+            });
+            const blob = new Blob(['\uFEFF' + rows.join('\n')], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `NeoKhata_FriendsHub_${new Date().toISOString().slice(0, 10)}.csv`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            showToast('Friends Hub CSV exported!');
+        }
+
+        function renderPremiumDashboardWealthStrip() {
+            const strip = document.getElementById('dash-premium-wealth-strip');
+            if (!strip) return;
+            const now = new Date();
+            const curMonth = now.getMonth();
+            const curYear = now.getFullYear();
+            const prevMonth = curMonth === 0 ? 11 : curMonth - 1;
+            const prevYear = curMonth === 0 ? curYear - 1 : curYear;
+
+            let totalInc = 0, totalExp = 0, curMonthExp = 0, prevMonthExp = 0;
+            const catCurMonth = {};
+            (appState.transactions || []).forEach(tx => {
+                const amt = Number(tx.amount) || 0;
+                const d = new Date(tx.date || Date.now());
+                if (tx.type === 'income') {
+                    totalInc += amt;
+                } else {
+                    totalExp += amt;
+                    if (d.getMonth() === curMonth && d.getFullYear() === curYear) {
+                        curMonthExp += amt;
+                        catCurMonth[tx.category || 'Other'] = (catCurMonth[tx.category || 'Other'] || 0) + amt;
+                    } else if (d.getMonth() === prevMonth && d.getFullYear() === prevYear) {
+                        prevMonthExp += amt;
+                    }
+                }
+            });
+
+            const goalSaved = (appState.savingsGoals || []).reduce((s, g) => s + (Number(g.saved) || 0), 0);
+            const udharDue = (appState.udharCustomers || []).reduce((s, c) => s + Math.max(0, getUdharCustomerBalance(c).net), 0);
+            const netWorth = (totalInc - totalExp) + goalSaved + udharDue;
+            const monthlyBaseline = Math.max(1, Number(appState.budget) || curMonthExp || 10000);
+            const emergencyMonths = ((Math.max(0, totalInc - totalExp) + goalSaved) / monthlyBaseline).toFixed(1);
+            const momDiffPct = prevMonthExp > 0 ? Math.round(((curMonthExp - prevMonthExp) / prevMonthExp) * 100) : 0;
+
+            const overspentCats = [];
+            Object.entries(appState.categoryBudgets || {}).forEach(([cat, lim]) => {
+                const limitVal = Number(lim) || 0;
+                const spentVal = catCurMonth[cat] || 0;
+                if (limitVal > 0 && spentVal >= limitVal * 0.8) {
+                    overspentCats.push(`${cat}: ₹${spentVal.toLocaleString('en-IN')}/${limitVal.toLocaleString('en-IN')} (${Math.round((spentVal / limitVal) * 100)}%)`);
+                }
+            });
+
+            strip.innerHTML = `
+                <div class="grid grid-cols-3 gap-2 text-[10px]">
+                    <div class="p-2.5 rounded-xl bg-neutral-100/85 dark:bg-white/[0.06] border border-neutral-200/80 dark:border-white/10">
+                        <span class="text-neutral-400 font-bold block">Est. Net Worth</span>
+                        <strong class="text-xs sm:text-sm font-black text-neutral-900 dark:text-white tabular-nums">${netWorth < 0 ? '-' : ''}₹${Math.abs(Math.round(netWorth)).toLocaleString('en-IN')}</strong>
+                    </div>
+                    <div class="p-2.5 rounded-xl bg-neutral-100/85 dark:bg-white/[0.06] border border-neutral-200/80 dark:border-white/10">
+                        <span class="text-neutral-400 font-bold block">Emergency Buffer</span>
+                        <strong class="text-xs sm:text-sm font-black text-emerald-600 dark:text-emerald-300 tabular-nums">${emergencyMonths} Mos</strong>
+                    </div>
+                    <div class="p-2.5 rounded-xl bg-neutral-100/85 dark:bg-white/[0.06] border border-neutral-200/80 dark:border-white/10">
+                        <span class="text-neutral-400 font-bold block">vs Last Month</span>
+                        <strong class="text-xs sm:text-sm font-black ${momDiffPct > 0 ? 'text-rose-600' : 'text-emerald-600'} tabular-nums">${momDiffPct >= 0 ? '+' : ''}${momDiffPct}%</strong>
+                    </div>
+                </div>
+                ${overspentCats.length ? `<div class="p-2.5 rounded-xl bg-amber-500/15 border border-amber-500/35 text-[10.5px] font-bold text-amber-800 dark:text-amber-200 flex items-center gap-2"><i class="fa-solid fa-triangle-exclamation text-amber-600"></i><span>Category Budget Alert: ${overspentCats.join(' • ')}</span></div>` : ''}
+            `;
+        }
+
+        function initNeoKhataPremiumAddons() {
+            if (localStorage.getItem('neokhata_discreet_mode') === '1') {
+                document.body.classList.add('neokhata-discreet-mode');
+                const icon = document.getElementById('header-privacy-icon');
+                if (icon) icon.className = 'fa-solid fa-eye-slash text-sm text-amber-500';
+            }
+
+            // Wrap updateDashboard cleanly to render Net Worth, Emergency Gauge & Overspend Alerts
+            const origUpdateDashboard = window.updateDashboard;
+            if (typeof origUpdateDashboard === 'function' && !origUpdateDashboard._premiumWrapped) {
+                window.updateDashboard = function() {
+                    origUpdateDashboard.apply(this, arguments);
+                    renderPremiumDashboardWealthStrip();
+                };
+                window.updateDashboard._premiumWrapped = true;
+            }
+
+            // Upgrade addUnifiedSplitBill to support Exact ₹, Percentage %, Shares (1x/2x), Item-Wise Split, Recurring & Trip Lock
+            window.addUnifiedSplitBill = function(e) {
+                e.preventDefault();
+                ensureHubPremiumState();
+                if (appState.hubTripLocked) {
+                    showToast('Trip/Event is locked! Unlock it first to add new bills.', 'error');
+                    return;
+                }
+                const desc = document.getElementById('hub-desc')?.value.trim();
+                let amount = parseFloat(document.getElementById('hub-amount')?.value) || 0;
+                const category = document.getElementById('hub-category')?.value || 'Food';
+                const payer = document.getElementById('hub-payer')?.value || getPrimaryUserName();
+                const splitMode = document.getElementById('hub-split-mode')?.value || 'equal';
+                const isRecurring = !!document.getElementById('hub-bill-recurring')?.checked;
+                const selected = Array.from(document.querySelectorAll('#hub-checkboxes-container input[type="checkbox"]:checked')).map(cb => cb.value);
+
+                if (!desc) {
+                    showToast('Enter bill description', 'error');
+                    return;
+                }
+
+                const customShares = {};
+                if (splitMode === 'itemwise') {
+                    let itemsTotal = 0;
+                    hubItemwiseDraftRows.forEach(r => {
+                        const rowAmt = parseFloat(r.amount) || 0;
+                        const assignees = Array.isArray(r.assignedTo) && r.assignedTo.length ? r.assignedTo : selected;
+                        if (rowAmt > 0 && assignees.length > 0) {
+                            itemsTotal += rowAmt;
+                            const share = rowAmt / assignees.length;
+                            assignees.forEach(mName => { customShares[mName] = (customShares[mName] || 0) + share; });
+                        }
+                    });
+                    if (itemsTotal <= 0) {
+                        showToast('Add at least 1 item with ₹ price and assigned members', 'error');
+                        return;
+                    }
+                    amount = Number(itemsTotal.toFixed(2));
+                } else {
+                    if (amount <= 0 || selected.length === 0) {
+                        showToast('Enter amount and select at least 1 member', 'error');
+                        return;
+                    }
+                    if (splitMode === 'exact') {
+                        let sumExact = 0;
+                        selected.forEach(mName => {
+                            const inp = document.querySelector(`.hub-split-val-inp[data-split-member="${mName.replace(/"/g, '\\"')}"]`);
+                            const v = parseFloat(inp?.value) || 0;
+                            customShares[mName] = v;
+                            sumExact += v;
+                        });
+                        if (Math.abs(sumExact - amount) > 1) {
+                            showToast(`Exact amounts sum (₹${sumExact}) must match bill total (₹${amount})`, 'error');
+                            return;
+                        }
+                    } else if (splitMode === 'percent') {
+                        let sumPct = 0;
+                        selected.forEach(mName => {
+                            const inp = document.querySelector(`.hub-split-val-inp[data-split-member="${mName.replace(/"/g, '\\"')}"]`);
+                            const pct = parseFloat(inp?.value) || 0;
+                            sumPct += pct;
+                            customShares[mName] = (amount * pct) / 100;
+                        });
+                        if (Math.abs(sumPct - 100) > 0.5) {
+                            showToast(`Percentages must total 100% (currently ${sumPct}%)`, 'error');
+                            return;
+                        }
+                    } else if (splitMode === 'shares') {
+                        let totalWeight = 0;
+                        const weights = {};
+                        selected.forEach(mName => {
+                            const inp = document.querySelector(`.hub-split-val-inp[data-split-member="${mName.replace(/"/g, '\\"')}"]`);
+                            const w = Math.max(0.1, parseFloat(inp?.value) || 1);
+                            weights[mName] = w;
+                            totalWeight += w;
+                        });
+                        selected.forEach(mName => {
+                            customShares[mName] = (amount * weights[mName]) / totalWeight;
+                        });
+                    } else {
+                        const eq = amount / selected.length;
+                        selected.forEach(mName => { customShares[mName] = eq; });
+                    }
+                }
+
+                const billId = `sbill_${Date.now()}`;
+                const participants = Object.keys(customShares).length ? Object.keys(customShares) : selected;
+                const res = logUnifiedAutoHistoryEntry({
+                    section: 'hub',
+                    type: 'expense',
+                    amount,
+                    category,
+                    mode: 'UPI',
+                    sourceRefId: billId,
+                    note: `[Group Split (${splitMode.toUpperCase()}) by ${payer}] ${desc}`,
+                    dedupeKey: `hub_split::${payer.toLowerCase()}::${desc.toLowerCase()}::${Date.now()}`,
+                    notifyOnDuplicate: false,
+                    silentSuccess: true
+                });
+                if (!res.logged) return;
+
+                if (!Array.isArray(appState.splitBills)) appState.splitBills = [];
+                appState.splitBills.unshift({
+                    id: billId,
+                    desc,
+                    amount,
+                    category,
+                    payer,
+                    splitMode,
+                    isRecurring,
+                    splitBetween: participants,
+                    customShares,
+                    date: new Date().toISOString()
+                });
+                logHubAuditEvent(`Added ${splitMode.toUpperCase()} bill "${desc}" (₹${amount.toLocaleString('en-IN')})`);
+                if (document.getElementById('hub-desc')) document.getElementById('hub-desc').value = '';
+                if (document.getElementById('hub-amount')) document.getElementById('hub-amount').value = '';
+                hubItemwiseDraftRows = [];
+                renderHubItemwiseRows();
+                saveState();
+                updateAll();
+                showToast(`Split ₹${amount.toLocaleString('en-IN')} (${splitMode.toUpperCase()}) across ${participants.length} members!`);
+            };
+
+            const origRenderSplitter = window.renderSplitter;
+            if (typeof origRenderSplitter === 'function' && !origRenderSplitter._premiumWrapped) {
+                window.renderSplitter = function() {
+                    ensureUnifiedPrimaryMember();
+                    ensureHubPremiumState();
+                    origRenderSplitter.apply(this, arguments);
+                    renderHubMemberSplitInputs();
+
+                    const members = appState.splitMembers || [];
+                    const bills = appState.splitBills || [];
+                    const settlementsDone = appState.hubSettlements || [];
+                    const totalOutflow = bills.reduce((s, b) => s + (Number(b.amount) || 0), 0);
+
+                    const paidByMember = {};
+                    const netByMember = {};
+                    const catTotals = {};
+                    members.forEach(m => { paidByMember[m.name] = 0; netByMember[m.name] = 0; });
+
+                    bills.forEach(b => {
+                        const amt = Number(b.amount) || 0;
+                        const cat = b.category || 'Other';
+                        catTotals[cat] = (catTotals[cat] || 0) + amt;
+                        paidByMember[b.payer] = (paidByMember[b.payer] || 0) + amt;
+                        netByMember[b.payer] = (netByMember[b.payer] || 0) + amt;
+                        const shares = computeBillMemberShares(b);
+                        Object.entries(shares).forEach(([mName, sAmt]) => {
+                            netByMember[mName] = (netByMember[mName] || 0) - (Number(sAmt) || 0);
+                        });
+                    });
+
+                    settlementsDone.forEach(st => {
+                        const sAmt = Number(st.amount) || 0;
+                        if (sAmt > 0) {
+                            netByMember[st.from] = (netByMember[st.from] || 0) + sAmt;
+                            netByMember[st.to] = (netByMember[st.to] || 0) - sAmt;
+                        }
+                    });
+
+                    const memList = document.getElementById('splitter-members-list');
+                    if (memList) {
+                        const rankedMembers = [...members].sort((a, b) => {
+                            const diff = (paidByMember[b.name] || 0) - (paidByMember[a.name] || 0);
+                            if (Math.abs(diff) > 0.01) return diff;
+                            return a.isPrimary ? -1 : (b.isPrimary ? 1 : 0);
+                        });
+                        memList.innerHTML = rankedMembers.map((m, idx) => {
+                            const rankNum = idx + 1;
+                            const paidAmt = paidByMember[m.name] || 0;
+                            const sharePct = totalOutflow > 0 ? ((paidAmt / totalOutflow) * 100).toFixed(1) : '0.0';
+                            const barWidth = totalOutflow > 0 ? Math.min(100, Math.round((paidAmt / totalOutflow) * 100)) : 0;
+                            const rankBadgeCls = rankNum === 1
+                                ? 'bg-amber-500 text-white'
+                                : (rankNum === 2
+                                    ? 'bg-slate-600 text-white'
+                                    : (rankNum === 3
+                                        ? 'bg-orange-600 text-white'
+                                        : 'bg-primary-600/15 text-primary-700 dark:text-primary-300'));
+                            return `
+                                <div class="p-3 rounded-2xl bg-white dark:bg-neutral-900 border ${m.isPrimary ? 'border-primary-400/70' : 'border-neutral-200 dark:border-neutral-800'} space-y-2 text-xs shadow-2xs">
+                                    <div class="flex items-center justify-between gap-2">
+                                        <div class="flex items-center gap-2 min-w-0">
+                                            <span class="px-2 py-0.5 rounded-lg font-mono font-black text-[10px] flex-shrink-0 ${rankBadgeCls}">#${rankNum} · ${sharePct}%</span>
+                                            <div class="min-w-0">
+                                                <div class="font-black text-neutral-900 dark:text-white truncate flex items-center gap-1">
+                                                    <span>${m.name}</span>
+                                                    ${m.isPrimary ? '<span class="px-1.5 py-0.2 rounded bg-primary-600 text-white text-[8.5px] font-black uppercase">You</span>' : ''}
+                                                </div>
+                                                <div class="text-[10px] text-neutral-500 font-bold">Paid: ₹${Math.round(paidAmt).toLocaleString('en-IN')}</div>
+                                            </div>
+                                        </div>
+                                        <div class="flex items-center gap-1 flex-shrink-0">
+                                            <button type="button" onclick="openEditSplitterMember('${m.name.replace(/'/g, "\\'")}')" class="p-1 text-primary-600"><i class="fa-solid fa-pen"></i></button>
+                                            ${m.isPrimary ? '' : `<button type="button" onclick="deleteSplitterMember('${m.name.replace(/'/g, "\\'")}')" class="p-1 text-rose-500"><i class="fa-solid fa-trash"></i></button>`}
+                                        </div>
+                                    </div>
+                                    <div class="w-full h-1.5 rounded-full bg-neutral-200 dark:bg-neutral-800 overflow-hidden">
+                                        <div class="h-full bg-gradient-to-r from-primary-600 to-purple-600 rounded-full transition-all" style="width:${barWidth}%"></div>
+                                    </div>
+                                </div>
+                            `;
+                        }).join('');
+                    }
+
+                    const debtors = [];
+                    const creditors = [];
+                    Object.entries(netByMember).forEach(([name, bal]) => {
+                        if (bal < -0.5) debtors.push({ name, amt: -bal });
+                        else if (bal > 0.5) creditors.push({ name, amt: bal });
+                    });
+                    debtors.sort((a, b) => b.amt - a.amt);
+                    creditors.sort((a, b) => b.amt - a.amt);
+
+                    const settlements = [];
+                    let i = 0, j = 0;
+                    while (i < debtors.length && j < creditors.length) {
+                        const payAmt = Math.min(debtors[i].amt, creditors[j].amt);
+                        const credObj = members.find(m => m.name === creditors[j].name);
+                        settlements.push({
+                            from: debtors[i].name,
+                            to: creditors[j].name,
+                            amount: Math.round(payAmt),
+                            upi: credObj?.upi || appState.merchantUpi || 'user@upi'
+                        });
+                        debtors[i].amt -= payAmt;
+                        creditors[j].amt -= payAmt;
+                        if (debtors[i].amt < 0.5) i++;
+                        if (creditors[j].amt < 0.5) j++;
+                    }
+
+                    const myName = getPrimaryUserName();
+                    const myNet = Math.round(netByMember[myName] || 0);
+                    if (document.getElementById('hub-kpi-total-spend')) document.getElementById('hub-kpi-total-spend').textContent = `₹${totalOutflow.toLocaleString('en-IN')}`;
+                    if (document.getElementById('hub-kpi-net-label')) {
+                        document.getElementById('hub-kpi-net-label').textContent = myNet >= 0 ? 'You Will Get' : 'You Owe';
+                    }
+                    const netValEl = document.getElementById('hub-kpi-net-value');
+                    if (netValEl) {
+                        netValEl.textContent = `₹${Math.abs(myNet).toLocaleString('en-IN')}`;
+                        netValEl.className = `text-lg sm:text-xl font-black tabular-nums mt-0.5 ${myNet >= 0 ? 'text-emerald-700 dark:text-emerald-300' : 'text-rose-600'}`;
+                    }
+                    if (document.getElementById('hub-kpi-pending-count')) {
+                        document.getElementById('hub-kpi-pending-count').textContent = `${settlements.length} Transfer${settlements.length === 1 ? '' : 's'}`;
+                    }
+
+                    const lockBadge = document.getElementById('hub-trip-lock-badge');
+                    const lockBtn = document.getElementById('hub-trip-lock-btn');
+                    if (lockBadge) {
+                        lockBadge.textContent = appState.hubTripLocked ? 'Locked' : 'Unlocked';
+                        lockBadge.className = appState.hubTripLocked ? 'text-rose-600 font-black' : 'text-emerald-600 font-black';
+                    }
+                    if (lockBtn) {
+                        lockBtn.innerHTML = appState.hubTripLocked ? '<i class="fa-solid fa-lock text-rose-600 mr-1"></i>Unlock' : '<i class="fa-solid fa-lock-open mr-1"></i>Lock Trip';
+                    }
+
+                    const settleEl = document.getElementById('settlement-results');
+                    if (settleEl) {
+                        settleEl.innerHTML = settlements.length ? settlements.map((s, sIdx) => {
+                            const pendingDays = computeHubSettlementPendingDays(s.from, s.to, bills);
+                            const agingBadge = pendingDays >= 7
+                                ? `<span class="px-2 py-0.5 rounded-full bg-rose-500/15 text-rose-600 font-black text-[9px]">⏳ ${pendingDays}d Overdue</span>`
+                                : `<span class="px-2 py-0.5 rounded-full bg-amber-500/15 text-amber-700 dark:text-amber-300 font-bold text-[9px]">🕒 ${pendingDays}d Pending</span>`;
+                            const partialInputId = `hub-partial-amt-${sIdx}`;
+                            return `
+                            <div class="p-3 rounded-2xl bg-white dark:bg-neutral-900 border border-primary-200 dark:border-neutral-800 space-y-2 text-xs">
+                                <div class="flex items-center justify-between gap-2">
+                                    <div class="min-w-0">
+                                        <div class="font-bold text-neutral-900 dark:text-white truncate flex items-center gap-1.5 flex-wrap">
+                                            <span><span class="text-rose-600">${s.from}</span> → <span class="text-emerald-600">${s.to}</span></span>
+                                            ${agingBadge}
+                                        </div>
+                                        <div class="text-[10px] font-mono text-neutral-400 truncate">${s.upi}</div>
+                                    </div>
+                                    <span class="font-black text-sm text-primary-600">₹${s.amount.toLocaleString('en-IN')}</span>
+                                </div>
+                                <div class="flex items-center gap-1.5 pt-1 border-t border-neutral-100 dark:border-neutral-800">
+                                    <input type="number" step="any" min="1" max="${s.amount}" id="${partialInputId}" placeholder="Partial ₹" class="w-24 p-1.5 rounded-lg bg-neutral-100 dark:bg-neutral-800 border text-[10px] font-black">
+                                    <button type="button" onclick="recordHubPartialSettlement('${s.from.replace(/'/g, "\\'")}', '${s.to.replace(/'/g, "\\'")}', ${s.amount}, '${partialInputId}')" class="px-2.5 py-1.5 rounded-lg bg-indigo-600/15 hover:bg-indigo-600 text-indigo-700 dark:text-indigo-300 hover:text-white font-black text-[10px] transition">Record Partial</button>
+                                </div>
+                                <div class="grid grid-cols-3 gap-1.5 pt-1 border-t border-neutral-100 dark:border-neutral-800">
+                                    <button type="button" onclick="openHubSettlementQr('${s.from.replace(/'/g, "\\'")}', '${s.to.replace(/'/g, "\\'")}', ${s.amount}, '${s.upi}')" class="py-1.5 px-2 rounded-lg bg-primary-600 hover:bg-primary-700 text-white font-bold text-[10px]"><i class="fa-solid fa-qrcode mr-1"></i>Pay QR</button>
+                                    <button type="button" onclick="sendHubSettlementWhatsApp('${s.from.replace(/'/g, "\\'")}', '${s.to.replace(/'/g, "\\'")}', ${s.amount}, '${s.upi}')" class="py-1.5 px-2 rounded-lg bg-emerald-600/15 hover:bg-emerald-600 text-emerald-700 dark:text-emerald-300 hover:text-white font-bold text-[10px]"><i class="fa-brands fa-whatsapp mr-1"></i>Remind</button>
+                                    <button type="button" onclick="markHubSettlementPaid('${s.from.replace(/'/g, "\\'")}', '${s.to.replace(/'/g, "\\'")}', ${s.amount})" class="py-1.5 px-2 rounded-lg bg-amber-500/15 hover:bg-amber-600 text-amber-800 dark:text-amber-300 hover:text-white font-bold text-[10px]"><i class="fa-solid fa-check mr-1"></i>Mark Paid</button>
+                                </div>
+                            </div>
+                        `;
+                        }).join('') : '<div class="text-center py-6 text-xs text-emerald-600 font-bold">✓ All group balances are settled!</div>';
+                    }
+
+                    // Enhance Split Bills Ledger cards with Dispute / Confirm Share controls
+                    const billListEl = document.getElementById('split-bills-list');
+                    if (billListEl && bills.length > 0) {
+                        const q = (document.getElementById('hub-search-bill')?.value || '').toLowerCase().trim();
+                        const catF = document.getElementById('hub-filter-category')?.value || 'ALL';
+                        const filteredBills = bills.filter(b => {
+                            if (catF !== 'ALL' && b.category !== catF) return false;
+                            if (q && !`${b.desc} ${b.payer}`.toLowerCase().includes(q)) return false;
+                            return true;
+                        });
+                        billListEl.innerHTML = filteredBills.map(b => {
+                            const disputeStatus = b.disputeStatus || 'unverified';
+                            const statusBadge = disputeStatus === 'disputed'
+                                ? `<span class="px-1.5 py-0.5 rounded bg-rose-500/15 text-rose-600 font-black text-[9px]">⚠️ Query: ${b.disputeNote || 'Review Requested'}</span>`
+                                : (disputeStatus === 'confirmed'
+                                    ? '<span class="px-1.5 py-0.5 rounded bg-emerald-500/15 text-emerald-600 font-black text-[9px]">✓ Share Confirmed</span>'
+                                    : '');
+                            return `
+                                <div class="p-3 rounded-2xl bg-white dark:bg-neutral-900 border ${disputeStatus === 'disputed' ? 'border-rose-400' : 'border-neutral-200 dark:border-neutral-800'} space-y-1.5 text-xs">
+                                    <div class="flex items-center justify-between gap-2">
+                                        <div class="min-w-0">
+                                            <div class="font-black truncate flex items-center gap-1.5 flex-wrap">
+                                                <span>${b.desc}</span>
+                                                ${b.isRecurring ? '<span class="px-1.5 py-0.5 rounded bg-purple-500/15 text-purple-600 text-[9px] font-black">Recurring</span>' : ''}
+                                                ${statusBadge}
+                                            </div>
+                                            <div class="text-[10px] text-neutral-400">Paid by ${b.payer} • ${(b.splitMode || 'equal').toUpperCase()} (${(b.splitBetween || []).length} ways)</div>
+                                        </div>
+                                        <div class="flex items-center gap-2 flex-shrink-0">
+                                            <span class="font-black text-primary-600">₹${Number(b.amount).toLocaleString('en-IN')}</span>
+                                            <button type="button" onclick="openEditSplitBill('${b.id}')" class="text-primary-600"><i class="fa-solid fa-pen"></i></button>
+                                            <button type="button" onclick="deleteSplitBill('${b.id}')" class="text-rose-500"><i class="fa-solid fa-trash"></i></button>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-center gap-1.5 pt-1 border-t border-neutral-100 dark:border-neutral-800 text-[10px]">
+                                        <button type="button" onclick="setHubBillDisputeState('${b.id}', 'confirmed')" class="px-2 py-0.5 rounded bg-emerald-500/10 hover:bg-emerald-600 text-emerald-700 dark:text-emerald-300 hover:text-white font-bold transition">✓ Confirm Share</button>
+                                        <button type="button" onclick="setHubBillDisputeState('${b.id}', 'disputed')" class="px-2 py-0.5 rounded bg-rose-500/10 hover:bg-rose-600 text-rose-600 hover:text-white font-bold transition">⚠️ Raise Query</button>
+                                    </div>
+                                </div>
+                            `;
+                        }).join('');
+                    }
+
+                    const catBox = document.getElementById('hub-category-analytics-list');
+                    if (catBox) {
+                        const entries = Object.entries(catTotals).sort((a, b) => b[1] - a[1]);
+                        catBox.innerHTML = entries.length ? entries.map(([cat, val]) => {
+                            const pct = totalOutflow > 0 ? Math.round((val / totalOutflow) * 100) : 0;
+                            return `<div class="space-y-1">
+                                <div class="flex justify-between font-bold"><span>${cat}</span><span>₹${val.toLocaleString('en-IN')} (${pct}%)</span></div>
+                                <div class="w-full h-1.5 rounded-full bg-neutral-200 dark:bg-neutral-800 overflow-hidden"><div class="h-full bg-purple-600 rounded-full" style="width:${pct}%"></div></div>
+                            </div>`;
+                        }).join('') : '<div class="text-neutral-400 text-center py-3">No group category data yet.</div>';
+                    }
+
+                    const auditBox = document.getElementById('hub-audit-trail-list');
+                    const auditPill = document.getElementById('hub-audit-count-pill');
+                    if (auditPill) auditPill.textContent = `${(appState.hubAuditLogs || []).length} Logs`;
+                    if (auditBox) {
+                        auditBox.innerHTML = (appState.hubAuditLogs || []).length ? appState.hubAuditLogs.slice(0, 20).map(l => `
+                            <div class="p-2 rounded-xl bg-neutral-100/90 dark:bg-neutral-800/80 flex items-center justify-between gap-2">
+                                <span class="font-bold text-neutral-800 dark:text-neutral-200 truncate">${l.actor}: ${l.action}</span>
+                                <span class="text-[9px] font-mono text-neutral-400 flex-shrink-0">${new Date(l.ts).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })}</span>
+                            </div>
+                        `).join('') : '<div class="text-neutral-400 text-center py-3">Activity trail will record new splits & settlements.</div>';
+                    }
+
+                    // Render High-Clarity "Who Did What" Transparency Analytics (Ranked Paid vs Fair Share % + Bill-by-Bill Breakdown)
+                    const owedByMember = {};
+                    members.forEach(m => { owedByMember[m.name] = 0; });
+                    bills.forEach(b => {
+                        const shares = computeBillMemberShares(b);
+                        Object.entries(shares).forEach(([mName, sAmt]) => {
+                            owedByMember[mName] = (owedByMember[mName] || 0) + (Number(sAmt) || 0);
+                        });
+                    });
+
+                    const rankedForTransparency = [...members].sort((a, b) => {
+                        const diff = (paidByMember[b.name] || 0) - (paidByMember[a.name] || 0);
+                        if (Math.abs(diff) > 0.01) return diff;
+                        return a.isPrimary ? -1 : (b.isPrimary ? 1 : 0);
+                    });
+
+                    const transpPill = document.getElementById('hub-transparency-summary-pill');
+                    if (transpPill) transpPill.textContent = `${rankedForTransparency.length} Members Ranked`;
+
+                    const whoMembersEl = document.getElementById('hub-who-did-what-members');
+                    if (whoMembersEl) {
+                        whoMembersEl.innerHTML = rankedForTransparency.length ? rankedForTransparency.map((m, idx) => {
+                            const rank = idx + 1;
+                            const paid = Math.round(paidByMember[m.name] || 0);
+                            const fairShare = Math.round(owedByMember[m.name] || 0);
+                            const netVal = Math.round(netByMember[m.name] || 0);
+                            const paidPct = totalOutflow > 0 ? ((paid / totalOutflow) * 100).toFixed(1) : '0.0';
+                            const barPct = totalOutflow > 0 ? Math.min(100, Math.round((paid / totalOutflow) * 100)) : 0;
+                            return `
+                                <div class="p-3 rounded-xl bg-white dark:bg-neutral-900 border border-neutral-200/90 dark:border-neutral-800 space-y-2">
+                                    <div class="flex items-center justify-between gap-2">
+                                        <div class="flex items-center gap-1.5 min-w-0">
+                                            <span class="px-2 py-0.5 rounded-md bg-primary-600 text-white font-mono font-black text-[10px]">#${rank}</span>
+                                            <span class="font-black text-neutral-900 dark:text-white truncate">${m.name}</span>
+                                            <span class="text-[10px] font-mono font-extrabold text-primary-600">(${paidPct}%)</span>
+                                        </div>
+                                        <span class="px-2 py-0.5 rounded-full font-black text-[9.5px] ${netVal >= 0 ? 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-300' : 'bg-rose-500/15 text-rose-600'}">
+                                            ${netVal >= 0 ? `Gets ₹${netVal.toLocaleString('en-IN')}` : `Owes ₹${Math.abs(netVal).toLocaleString('en-IN')}`}
+                                        </span>
+                                    </div>
+                                    <div class="grid grid-cols-3 gap-1.5 text-[10px] bg-neutral-100/80 dark:bg-neutral-800/80 p-2 rounded-lg">
+                                        <div><span class="text-neutral-400 block">Paid</span><strong class="font-black text-emerald-600">₹${paid.toLocaleString('en-IN')}</strong></div>
+                                        <div><span class="text-neutral-400 block">Fair Share</span><strong class="font-black text-neutral-800 dark:text-neutral-200">₹${fairShare.toLocaleString('en-IN')}</strong></div>
+                                        <div class="text-right"><span class="text-neutral-400 block">Contribution</span><strong class="font-black text-primary-600">${paidPct}%</strong></div>
+                                    </div>
+                                    <div class="w-full h-1.5 rounded-full bg-neutral-200 dark:bg-neutral-800 overflow-hidden">
+                                        <div class="h-full bg-gradient-to-r from-emerald-500 to-primary-600 rounded-full" style="width:${barPct}%"></div>
+                                    </div>
+                                </div>
+                            `;
+                        }).join('') : '<div class="text-center py-4 text-neutral-400">No members in roster yet.</div>';
+                    }
+
+                    const billCountEl = document.getElementById('hub-bill-breakdown-count');
+                    if (billCountEl) billCountEl.textContent = `${bills.length} Bill${bills.length === 1 ? '' : 's'}`;
+                    const whoBillsEl = document.getElementById('hub-who-did-what-bills');
+                    if (whoBillsEl) {
+                        whoBillsEl.innerHTML = bills.length ? bills.map((b, bIdx) => {
+                            const shares = computeBillMemberShares(b);
+                            const shareBadges = Object.entries(shares).map(([mName, sAmt]) =>
+                                `<span class="px-2 py-0.5 rounded-md bg-neutral-100 dark:bg-neutral-800 border border-neutral-200/80 dark:border-neutral-700 text-[9.5px] font-bold">${mName}: <strong>₹${Math.round(Number(sAmt) || 0).toLocaleString('en-IN')}</strong></span>`
+                            ).join('');
+                            return `
+                                <div class="p-3 rounded-xl bg-white dark:bg-neutral-900 border border-neutral-200/90 dark:border-neutral-800 space-y-1.5">
+                                    <div class="flex items-center justify-between gap-2">
+                                        <div class="min-w-0">
+                                            <span class="font-black text-neutral-900 dark:text-white truncate block">#${bIdx + 1} ${b.desc}</span>
+                                            <span class="text-[10px] text-emerald-600 font-bold">Paid by ${b.payer} • Mode: ${(b.splitMode || 'equal').toUpperCase()}</span>
+                                        </div>
+                                        <span class="font-black text-primary-600 flex-shrink-0">₹${Number(b.amount).toLocaleString('en-IN')}</span>
+                                    </div>
+                                    <div class="flex flex-wrap gap-1 pt-1 border-t border-neutral-100 dark:border-neutral-800">
+                                        ${shareBadges}
+                                    </div>
+                                </div>
+                            `;
+                        }).join('') : '<div class="text-center py-4 text-neutral-400">Add a group bill to inspect per-member share breakdowns.</div>';
+                    }
+                };
+                window.renderSplitter._premiumWrapped = true;
+            }
+
+            renderPremiumDashboardWealthStrip();
+            initTimedSixDigitFriendCodeSystem();
+            renderSplitter();
+        }
+
+        // ================= TIMED 6-DIGIT NUMERIC UNIQUE ID SYSTEM & 7 FRIENDS HUB FEATURES =================
+        let _hubFriendCodeTicker = null;
+        let _loadedRemoteFriendCodeData = null;
+
+        function generateStrictSixDigitNumericCode(excludeCode = '') {
+            let code = '';
+            let guard = 0;
+            do {
+                const n = Math.floor(Math.random() * 1000000);
+                code = String(n).padStart(6, '0');
+                guard++;
+            } while (code === excludeCode && guard < 50);
+            return code;
+        }
+
+        function ensureTimedFriendCodeState() {
+            const ttlSelect = document.getElementById('hub-friend-code-ttl');
+            const defaultMins = Math.max(1, parseInt(ttlSelect?.value || '30', 10) || 30);
+            if (!appState.hubTimedFriendCode || typeof appState.hubTimedFriendCode !== 'object') {
+                appState.hubTimedFriendCode = {
+                    code: generateStrictSixDigitNumericCode(),
+                    durationMins: defaultMins,
+                    expiresAt: Date.now() + defaultMins * 60000,
+                    updatedAt: Date.now()
+                };
+            }
+            const fc = appState.hubTimedFriendCode;
+            if (!/^\d{6}$/.test(String(fc.code || ''))) {
+                fc.code = generateStrictSixDigitNumericCode();
+            }
+            if (!fc.durationMins || Number(fc.durationMins) < 1) fc.durationMins = defaultMins;
+            // Automatic invalidation and rotation once selected duration expires
+            if (!fc.expiresAt || Date.now() >= Number(fc.expiresAt)) {
+                const prevCode = fc.code;
+                fc.code = generateStrictSixDigitNumericCode(prevCode);
+                fc.expiresAt = Date.now() + Number(fc.durationMins) * 60000;
+                fc.updatedAt = Date.now();
+                saveState();
+                publishTimedFriendCodeSnapshotToCloud(prevCode);
+            }
+            return fc;
+        }
+
+        function buildPublicShareableFriendHubSnapshot() {
+            const fc = ensureTimedFriendCodeState();
+            const members = appState.splitMembers || [];
+            const bills = appState.splitBills || [];
+            const totalSpend = bills.reduce((s, b) => s + (Number(b.amount) || 0), 0);
+            const paidByMember = {};
+            const netByMember = {};
+            members.forEach(m => { paidByMember[m.name] = 0; netByMember[m.name] = 0; });
+            bills.forEach(b => {
+                const amt = Number(b.amount) || 0;
+                paidByMember[b.payer] = (paidByMember[b.payer] || 0) + amt;
+                netByMember[b.payer] = (netByMember[b.payer] || 0) + amt;
+                const shares = computeBillMemberShares(b);
+                Object.entries(shares).forEach(([mName, sAmt]) => {
+                    netByMember[mName] = (netByMember[mName] || 0) - (Number(sAmt) || 0);
+                });
+            });
+            (appState.hubSettlements || []).forEach(st => {
+                const sAmt = Number(st.amount) || 0;
+                if (sAmt > 0) {
+                    netByMember[st.from] = (netByMember[st.from] || 0) + sAmt;
+                    netByMember[st.to] = (netByMember[st.to] || 0) - sAmt;
+                }
+            });
+
+            const rankedLeaderboard = [...members]
+                .sort((a, b) => (paidByMember[b.name] || 0) - (paidByMember[a.name] || 0))
+                .map((m, idx) => {
+                    const paid = Math.round(paidByMember[m.name] || 0);
+                    const pct = totalSpend > 0 ? ((paid / totalSpend) * 100).toFixed(1) : '0.0';
+                    return {
+                        rank: idx + 1,
+                        name: m.name,
+                        paid,
+                        pct,
+                        net: Math.round(netByMember[m.name] || 0)
+                    };
+                });
+
+            return {
+                code: fc.code,
+                ownerName: getPrimaryUserName(),
+                expiresAt: fc.expiresAt,
+                durationMins: fc.durationMins,
+                totalSpend: Math.round(totalSpend),
+                billsCount: bills.length,
+                leaderboard: rankedLeaderboard,
+                recentBills: bills.slice(0, 8).map(b => ({
+                    desc: b.desc,
+                    amount: Math.round(Number(b.amount) || 0),
+                    payer: b.payer,
+                    category: b.category || 'Other',
+                    splitMode: b.splitMode || 'equal'
+                })),
+                updatedAt: Date.now()
+            };
+        }
+
+        function publishTimedFriendCodeSnapshotToCloud(expiredOldCode = '') {
+            try {
+                const payload = buildPublicShareableFriendHubSnapshot();
+                const cache = JSON.parse(localStorage.getItem('neokhata_friend_code_directory') || '{}');
+                if (expiredOldCode && cache[expiredOldCode]) delete cache[expiredOldCode];
+                cache[payload.code] = payload;
+                safeLocalStorageSet('neokhata_friend_code_directory', JSON.stringify(cache));
+                if (typeof window.publishTimedFriendHubCodeToRtdb === 'function') {
+                    window.publishTimedFriendHubCodeToRtdb(payload, expiredOldCode).catch(() => {});
+                }
+            } catch (e) {}
+        }
+
+        function setHubFriendCodeDuration(minsVal) {
+            const mins = Math.max(1, parseInt(minsVal, 10) || 30);
+            const fc = ensureTimedFriendCodeState();
+            fc.durationMins = mins;
+            fc.expiresAt = Date.now() + mins * 60000;
+            fc.updatedAt = Date.now();
+            saveState();
+            publishTimedFriendCodeSnapshotToCloud();
+            updateTimedFriendCodeUi();
+            showToast(`6-Digit ID ${fc.code} validity set to ${mins} minutes`);
+        }
+
+        function regenerateHubFriendCode(manual = true) {
+            const fc = ensureTimedFriendCodeState();
+            const oldCode = fc.code;
+            const ttlSel = document.getElementById('hub-friend-code-ttl');
+            const mins = Math.max(1, parseInt(ttlSel?.value || fc.durationMins || 30, 10) || 30);
+            fc.code = generateStrictSixDigitNumericCode(oldCode);
+            fc.durationMins = mins;
+            fc.expiresAt = Date.now() + mins * 60000;
+            fc.updatedAt = Date.now();
+            logHubAuditEvent(`Rotated 6-Digit Friend ID to ${fc.code} (${mins}m validity)`);
+            saveState();
+            publishTimedFriendCodeSnapshotToCloud(oldCode);
+            updateTimedFriendCodeUi();
+            if (manual) showToast(`New 6-Digit Friend ID generated: ${fc.code}`);
+        }
+
+        function copyHubMyFriendCode() {
+            const fc = ensureTimedFriendCodeState();
+            const ta = document.createElement('textarea');
+            ta.value = fc.code;
+            document.body.appendChild(ta);
+            ta.select();
+            document.execCommand('copy');
+            document.body.removeChild(ta);
+            showToast(`Copied 6-Digit Friend ID: ${fc.code}`);
+        }
+
+        function updateTimedFriendCodeUi() {
+            const fc = ensureTimedFriendCodeState();
+            const codeEl = document.getElementById('hub-my-friend-code');
+            const timerEl = document.getElementById('hub-friend-code-timer');
+            const ttlSel = document.getElementById('hub-friend-code-ttl');
+            if (codeEl && codeEl.textContent !== fc.code) codeEl.textContent = fc.code;
+            if (ttlSel && String(ttlSel.value) !== String(fc.durationMins)) {
+                ttlSel.value = String(fc.durationMins);
+            }
+            const remMs = Math.max(0, Number(fc.expiresAt) - Date.now());
+            if (remMs <= 0) {
+                regenerateHubFriendCode(false);
+                return;
+            }
+            if (timerEl) {
+                const totSec = Math.ceil(remMs / 1000);
+                const hrs = Math.floor(totSec / 3600);
+                const mins = Math.floor((totSec % 3600) / 60);
+                const secs = totSec % 60;
+                const pad = (n) => String(n).padStart(2, '0');
+                timerEl.textContent = hrs > 0 ? `${hrs}h ${pad(mins)}m ${pad(secs)}s` : `${pad(mins)}m ${pad(secs)}s`;
+            }
+
+            // Also auto-dismiss remote loaded view if its validity timer has expired
+            if (_loadedRemoteFriendCodeData && Number(_loadedRemoteFriendCodeData.expiresAt) <= Date.now()) {
+                clearLoadedRemoteFriendHubView();
+                showToast('Loaded Friend ID session expired automatically', 'error');
+            }
+        }
+
+        async function searchAndLoadFriendHubCode() {
+            const inp = document.getElementById('hub-search-friend-code-input');
+            const statusEl = document.getElementById('hub-code-search-status');
+            const code = String(inp?.value || '').replace(/\D/g, '').slice(0, 6);
+            if (code.length !== 6) {
+                showToast('Please enter a valid 6-digit numeric ID (000000–999999)', 'error');
+                return;
+            }
+            if (statusEl) statusEl.textContent = 'Searching...';
+
+            let found = null;
+            // 1. Check local cache first (includes current user's active code & same-browser sessions)
+            try {
+                const currentSnap = buildPublicShareableFriendHubSnapshot();
+                if (currentSnap.code === code) found = currentSnap;
+                if (!found) {
+                    const cache = JSON.parse(localStorage.getItem('neokhata_friend_code_directory') || '{}');
+                    if (cache[code]) found = cache[code];
+                }
+            } catch (e) {}
+
+            // 2. Query Firebase Realtime Database for cross-device live shared Friends Hub data
+            if (!found && typeof window.lookupTimedFriendHubCodeInRtdb === 'function') {
+                found = await window.lookupTimedFriendHubCodeInRtdb(code);
+            }
+
+            if (!found || Number(found.expiresAt) <= Date.now()) {
+                if (statusEl) statusEl.textContent = 'Invalid or Expired ID';
+                showToast(`6-Digit ID ${code} is invalid or has expired!`, 'error');
+                return;
+            }
+
+            _loadedRemoteFriendCodeData = found;
+            if (statusEl) statusEl.textContent = `Viewing ID ${code}`;
+            document.getElementById('hub-clear-remote-view-btn')?.classList.remove('hidden');
+            renderLoadedRemoteFriendHubView();
+            showToast(`Loaded shared Friends Hub view for ID ${code}!`);
+        }
+
+        function renderLoadedRemoteFriendHubView() {
+            const panel = document.getElementById('hub-remote-shared-view-panel');
+            if (!panel || !_loadedRemoteFriendCodeData) return;
+            const d = _loadedRemoteFriendCodeData;
+            const remMins = Math.max(1, Math.ceil((Number(d.expiresAt) - Date.now()) / 60000));
+            panel.classList.remove('hidden');
+            panel.innerHTML = `
+                <div class="flex flex-wrap items-center justify-between gap-2 pb-2 border-b border-neutral-200 dark:border-neutral-800">
+                    <div>
+                        <span class="px-2 py-0.5 rounded-full bg-purple-600 text-white text-[9px] font-black uppercase">Shared Group View • ID ${d.code}</span>
+                        <h5 class="font-black text-sm text-neutral-900 dark:text-white mt-1">${d.ownerName}'s Friends Hub Summary • Total Spend: ₹${Number(d.totalSpend || 0).toLocaleString('en-IN')}</h5>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <span class="text-[10px] font-mono font-bold text-emerald-600">Valid ~${remMins}m</span>
+                        <button type="button" onclick="clearLoadedRemoteFriendHubView()" class="px-2.5 py-1 rounded-lg bg-rose-600 text-white font-black text-[10px]">Remove / Clear</button>
+                    </div>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                    <div class="space-y-1">
+                        <div class="text-[9.5px] font-black uppercase text-neutral-400">Ranked Paid Leaderboard (#1, #2, #3...)</div>
+                        ${(d.leaderboard || []).map(m => `
+                            <div class="p-2 rounded-lg bg-neutral-100 dark:bg-neutral-800 flex items-center justify-between">
+                                <span class="font-black">#${m.rank} ${m.name} (${m.pct}%)</span>
+                                <span class="font-mono font-bold text-emerald-600">Paid ₹${Number(m.paid).toLocaleString('en-IN')}</span>
+                            </div>
+                        `).join('') || '<div class="text-neutral-400">No members</div>'}
+                    </div>
+                    <div class="space-y-1">
+                        <div class="text-[9.5px] font-black uppercase text-neutral-400">Recent Group Bills (${d.billsCount || 0})</div>
+                        ${(d.recentBills || []).map(b => `
+                            <div class="p-2 rounded-lg bg-neutral-100 dark:bg-neutral-800 flex items-center justify-between">
+                                <span class="truncate pr-2 font-bold">${b.desc} (${b.payer})</span>
+                                <span class="font-mono font-black text-primary-600">₹${Number(b.amount).toLocaleString('en-IN')}</span>
+                            </div>
+                        `).join('') || '<div class="text-neutral-400">No bills shared yet</div>'}
+                    </div>
+                </div>
+            `;
+        }
+
+        function clearLoadedRemoteFriendHubView() {
+            _loadedRemoteFriendCodeData = null;
+            const panel = document.getElementById('hub-remote-shared-view-panel');
+            if (panel) {
+                panel.classList.add('hidden');
+                panel.innerHTML = '';
+            }
+            document.getElementById('hub-clear-remote-view-btn')?.classList.add('hidden');
+            const inp = document.getElementById('hub-search-friend-code-input');
+            if (inp) inp.value = '';
+            const statusEl = document.getElementById('hub-code-search-status');
+            if (statusEl) statusEl.textContent = 'Live RTDB & Local Sync';
+        }
+
+        // Feature 1: Dispute / Confirm Share Flow
+        function setHubBillDisputeState(billId, state) {
+            const bill = (appState.splitBills || []).find(b => b.id === billId);
+            if (!bill) return;
+            bill.disputeStatus = state;
+            if (state === 'disputed') {
+                bill.disputeNote = 'Amount / Member check requested';
+                logHubAuditEvent(`Raised query on "${bill.desc}"`);
+                showToast(`Query flagged on "${bill.desc}"`);
+            } else {
+                bill.disputeNote = '';
+                logHubAuditEvent(`Confirmed share on "${bill.desc}"`);
+                showToast(`Confirmed share on "${bill.desc}"`);
+            }
+            saveState();
+            renderSplitter();
+        }
+
+        // Feature 2: Partial Settlement Tracking
+        function recordHubPartialSettlement(fromName, toName, maxDue, inputId) {
+            const rawVal = parseFloat(document.getElementById(inputId)?.value) || 0;
+            if (rawVal <= 0 || rawVal > maxDue) {
+                showToast(`Enter a partial amount between ₹1 and ₹${maxDue}`, 'error');
+                return;
+            }
+            markHubSettlementPaid(fromName, toName, rawVal);
+        }
+
+        // Feature 3: Expense Split Calculator / Quick Tax & Tip Divider
+        function toggleHubTaxTipHelper() {
+            document.getElementById('hub-tax-tip-drawer')?.classList.toggle('hidden');
+            recalcHubTaxTipHelper();
+        }
+        function recalcHubTaxTipHelper() {
+            const base = parseFloat(document.getElementById('hub-calc-base')?.value) || 0;
+            const gst = parseFloat(document.getElementById('hub-calc-gst')?.value) || 0;
+            const fee = parseFloat(document.getElementById('hub-calc-fee')?.value) || 0;
+            const tip = parseFloat(document.getElementById('hub-calc-tip')?.value) || 0;
+            const total = Math.round(base + (base * gst) / 100 + fee + tip);
+            const prev = document.getElementById('hub-calc-total-preview');
+            if (prev) prev.textContent = `₹${total.toLocaleString('en-IN')}`;
+            return total;
+        }
+        function applyHubTaxTipToBillForm() {
+            const total = recalcHubTaxTipHelper();
+            const amtInp = document.getElementById('hub-amount');
+            if (amtInp && total > 0) {
+                amtInp.value = total;
+                showToast(`Applied ₹${total.toLocaleString('en-IN')} (incl. Tax & Tip) to bill amount`);
+            }
+        }
+
+        // Feature 4: Group Templates
+        function applyHubGroupTemplate(tplKey) {
+            const presets = {
+                roommates: { desc: 'Monthly Flat Rent & Wi-Fi', category: 'Rent', recurring: true },
+                trip: { desc: 'Weekend Trip Fuel & Hotel', category: 'Travel', recurring: false },
+                office: { desc: 'Office Team Tea & Lunch', category: 'Food', recurring: false },
+                party: { desc: 'Celebration Dinner & Snacks', category: 'Party', recurring: false }
+            };
+            const p = presets[tplKey];
+            if (!p) return;
+            if (document.getElementById('hub-desc')) document.getElementById('hub-desc').value = p.desc;
+            if (document.getElementById('hub-category')) document.getElementById('hub-category').value = p.category;
+            if (document.getElementById('hub-bill-recurring')) document.getElementById('hub-bill-recurring').checked = !!p.recurring;
+            showToast(`Applied "${p.desc}" template`);
+        }
+
+        // Feature 5: Group Invite / Shareable Summary Card
+        function shareHubGroupInviteCard() {
+            const snap = buildPublicShareableFriendHubSnapshot();
+            const lines = [
+                `*NeoKhata Friends Hub Summary*`,
+                `6-Digit Live Code: *${snap.code}*`,
+                `Total Group Spend: ₹${snap.totalSpend.toLocaleString('en-IN')} (${snap.billsCount} bills)`,
+                ``,
+                `*Paid Leaderboard:*`,
+                ...snap.leaderboard.map(m => `#${m.rank} ${m.name}: Paid ₹${m.paid.toLocaleString('en-IN')} (${m.pct}%) | Net: ${m.net >= 0 ? `+₹${m.net}` : `-₹${Math.abs(m.net)}`}`)
+            ];
+            window.open(`https://wa.me/?text=${encodeURIComponent(lines.join('\n'))}`, '_blank', 'noopener,noreferrer');
+        }
+
+        // Feature 6: Pending Dues Aging ("Days Pending")
+        function computeHubSettlementPendingDays(fromName, toName, bills) {
+            let earliestTs = Date.now();
+            (bills || []).forEach(b => {
+                if (b.payer === toName && Array.isArray(b.splitBetween) && b.splitBetween.includes(fromName)) {
+                    const t = new Date(b.date || Date.now()).getTime();
+                    if (!isNaN(t) && t < earliestTs) earliestTs = t;
+                }
+            });
+            return Math.max(0, Math.floor((Date.now() - earliestTs) / 86400000));
+        }
+
+        // Feature 7: Archive / Re-Open Group or Trip
+        function toggleHubArchiveGroupState() {
+            appState.hubGroupArchived = !appState.hubGroupArchived;
+            appState.hubTripLocked = appState.hubGroupArchived;
+            const btn = document.getElementById('hub-archive-toggle-btn');
+            if (btn) {
+                btn.innerHTML = appState.hubGroupArchived
+                    ? '<i class="fa-solid fa-box-open text-emerald-600 mr-1"></i>Re-Open Group'
+                    : '<i class="fa-solid fa-box-archive mr-1"></i>Archive Group';
+            }
+            logHubAuditEvent(appState.hubGroupArchived ? 'Archived Group / Trip' : 'Re-Opened Group / Trip');
+            saveState();
+            renderSplitter();
+            showToast(appState.hubGroupArchived ? 'Group archived (historical records preserved)' : 'Group re-opened for new entries');
+        }
+
+        function initTimedSixDigitFriendCodeSystem() {
+            ensureTimedFriendCodeState();
+            publishTimedFriendCodeSnapshotToCloud();
+            updateTimedFriendCodeUi();
+            if (_hubFriendCodeTicker) clearInterval(_hubFriendCodeTicker);
+            _hubFriendCodeTicker = setInterval(updateTimedFriendCodeUi, 1000);
+        }
     </script>
 
     <!-- Firebase Cloud Sync & Multi-Device Auth Module -->
@@ -20533,6 +22229,40 @@ ${JSON.stringify(liveSnapshot)}`;
                 return true;
             }
             return false;
+        };
+
+        window.publishTimedFriendHubCodeToRtdb = async function(payload, expiredOldCode = '') {
+            if (!payload || !payload.code) return false;
+            const ready = await ensureCloudReady();
+            if (!ready || !rtdb) return false;
+            try {
+                if (expiredOldCode && expiredOldCode !== payload.code) {
+                    await remove(ref(rtdb, `neokhata_friend_codes/${expiredOldCode}`)).catch(() => {});
+                }
+                await set(ref(rtdb, `neokhata_friend_codes/${payload.code}`), sanitizeForRtdb(payload));
+                return true;
+            } catch (e) {
+                return false;
+            }
+        };
+
+        window.lookupTimedFriendHubCodeInRtdb = async function(code) {
+            const cleanCode = String(code || '').replace(/\D/g, '').slice(0, 6);
+            if (cleanCode.length !== 6) return null;
+            const ready = await ensureCloudReady();
+            if (!ready || !rtdb) return null;
+            try {
+                const snap = await get(ref(rtdb, `neokhata_friend_codes/${cleanCode}`));
+                if (!snap.exists()) return null;
+                const data = snap.val();
+                if (!data || Number(data.expiresAt) <= Date.now()) {
+                    await remove(ref(rtdb, `neokhata_friend_codes/${cleanCode}`)).catch(() => {});
+                    return null;
+                }
+                return data;
+            } catch (e) {
+                return null;
+            }
         };
 
         // Re-attach live listeners & pull fresh data whenever user switches devices or unlocks screen
